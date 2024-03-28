@@ -6,10 +6,13 @@ namespace GoatNumerals
 {
     public static class GoatNumeralsConverter
     {
+        private const int Min = 1;
+        private const int Max = 3999;
+
         private static readonly Dictionary<int, string> IntToGoatNumerals = new()
         {
             {1000, "🐐"},
-            {900, "MeuMeeeh"},
+            {900, "Meeh🐐"},
             {500, "Baaa"},
             {400, "MeehBaaa"},
             {100, "Meeh"},
@@ -24,27 +27,25 @@ namespace GoatNumerals
         };
 
         public static Option<string> Convert(int number)
+            => IsInRange(number) ? ConvertSafely(number) : None;
+
+        private static bool IsInRange(int number) => number is >= Min and <= Max;
+
+        private static string ConvertSafely(int number)
         {
-            if (number != 0)
-            {
-                var goatNumerals = new StringBuilder();
-                var remaining = number;
+            var goatNumerals = new StringBuilder();
+            var remaining = number;
 
-                foreach (var toGoat in IntToGoatNumerals)
+            foreach (var toGoat in IntToGoatNumerals)
+            {
+                while (remaining >= toGoat.Key)
                 {
-                    while (remaining >= toGoat.Key)
-                    {
-                        goatNumerals.Append(toGoat.Value);
-                        remaining -= toGoat.Key;
-                    }
+                    goatNumerals.Append(toGoat.Value);
+                    remaining -= toGoat.Key;
                 }
+            }
 
-                return Some(goatNumerals.ToString());
-            }
-            else
-            {
-                return None;
-            }
+            return goatNumerals.ToString();
         }
     }
 }
