@@ -1,6 +1,8 @@
 # Unraveling the Power of Property-Based Testing in Unveiling our Own Biases
 With this article I would like to address an often-overlooked aspect of our craft: our inherent biases in test case identification and, consequently, in the production code we craft.
 
+![Goat Property-Based Testing](img/goat-pbt.webp)
+
 As `Alberto Brandolini` aptly put it:
 > "It is not the domain experts' knowledge that goes into production; it is the assumption of the developers that goes into production."
 
@@ -129,7 +131,7 @@ Still we have focused only on the input scope we identified and we may have miss
 Imagine an approach as powerful as Example based testing in terms of feature compliance checking but covering also a much more important numbers of inputs.
 That’s the promise behind `Property-Based Testing`.
 
-## Property-Based Testing at Our Rescue
+## Property-Based Testing at our Rescue
 Enter `Property-Based Testing` (PBT), a paradigm shift from our traditional example-based testing. 
 Unlike specifying a set of inputs and expected outputs, PBT allows us to define properties our code must adhere to, generating a wide range of test cases that challenge our unconscious biases. 
 
@@ -168,7 +170,7 @@ Install-Package FsCheck
 Install-Package FsCheck.Xunit
 ```
 
-### Create our First Property: Only Valid Goat Characters
+### Create our first Property: only valid Goat Characters
 Now that `FsCheck` is installed we can write a first property:
 
 ```csharp
@@ -246,7 +248,7 @@ private static readonly Dictionary<int, string> IntToGoatNumerals = new()
 
 After having made this fix our property is now green 🥳
 
-### Create a Second Property: None for Invalid Numbers
+### Create a second property: none for invalid numbers
 This one is even simpler to write:
 
 ```csharp
@@ -349,3 +351,5 @@ There are lots of Use Cases with PBT:
 
 - What do you think about it?
 - How it could be useful to you? and when?
+
+If you want to go further on this kind of topics I invite you to take a look at our [`Advent of Craft` repository](https://github.com/advent-of-craft/advent-of-craft).
