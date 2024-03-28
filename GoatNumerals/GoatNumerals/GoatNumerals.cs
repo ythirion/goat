@@ -8,7 +8,7 @@ namespace GoatNumerals
     {
         private static readonly Dictionary<int, string> IntToGoatNumerals = new()
         {
-            {1000, "Meeeh"},
+            {1000, "🐐"},
             {900, "MeuMeeeh"},
             {500, "Baaa"},
             {400, "MeehBaaa"},

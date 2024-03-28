@@ -1,5 +1,6 @@
 using FluentAssertions;
 using FluentAssertions.LanguageExt;
+using Xunit;
 using static GoatNumerals.GoatNumeralsConverter;
 
 namespace GoatNumerals.Tests
@@ -22,8 +23,8 @@ namespace GoatNumerals.Tests
         [InlineData(50, "Baa")]
         [InlineData(100, "Meeh")]
         [InlineData(500, "Baaa")]
-        [InlineData(1000, "Meeeh")]
-        [InlineData(2499, "MeeehMeeehMeehBaaaMehMeehMMeh")]
+        [InlineData(1000, "🐐")]
+        [InlineData(2499, "🐐🐐MeehBaaaMehMeehMMeh")]
         public void GenerateGoatNumeralsForNumbers(int number, string expectedGoatNumeral)
             => Convert(number)
                 .Should()
