@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
 using FluentAssertions;
-using FluentAssertions.LanguageExt;
 using FsCheck;
 using FsCheck.Xunit;
 using Xunit;
+using static System.String;
 using static GoatNumerals.GoatNumeralsConverter;
 
 namespace GoatNumerals.Tests
@@ -11,10 +11,10 @@ namespace GoatNumerals.Tests
     public partial class GoatNumeralsTest
     {
         [Fact]
-        public void GenerateNoneFor0()
+        public void GenerateEmptyFor0()
             => Convert(0)
                 .Should()
-                .BeNone();
+                .Be(Empty);
 
         [Theory]
         [InlineData(1, "M")]
@@ -32,7 +32,7 @@ namespace GoatNumerals.Tests
         public void GenerateGoatNumeralsForNumbers(int number, string expectedGoatNumeral)
             => Convert(number)
                 .Should()
-                .BeSome(x => x.Should().Be(expectedGoatNumeral));
+                .Be(expectedGoatNumeral);
 
         [GeneratedRegex("^(?:M|Ba|Meh|Baa|Meeh|Baaa|🐐)+$")]
         private static partial Regex ValidGoatRegex();
@@ -42,7 +42,7 @@ namespace GoatNumerals.Tests
         [Property]
         public void ReturnsOnlyValidSymbolsForValidNumbers()
             => Prop.ForAll(ValidNumbers,
-                    n => Convert(n).Exists(AllGoatCharactersAreValid))
+                    n => AllGoatCharactersAreValid(Convert(n)))
                 .QuickCheckThrowOnFailure();
 
         private static bool AllGoatCharactersAreValid(string goatNumber) => ValidGoatRegex().IsMatch(goatNumber);
@@ -50,8 +50,8 @@ namespace GoatNumerals.Tests
         private static readonly Arbitrary<int> InvalidNumbers = Arb.Default.Int32().Filter(x => x is <= 0 or > 3999);
 
         [Property]
-        public void ReturnsNoneForAnyInvalidNumber()
-            => Prop.ForAll(InvalidNumbers, n => Convert(n).IsNone)
+        public void ReturnsEmptyForAnyInvalidNumber()
+            => Prop.ForAll(InvalidNumbers, n => Convert(n) == Empty)
                 .QuickCheckThrowOnFailure();
     }
 }

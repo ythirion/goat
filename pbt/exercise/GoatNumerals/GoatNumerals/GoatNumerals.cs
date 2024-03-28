@@ -1,10 +1,7 @@
 ﻿using System.Text;
-using LanguageExt;
 
 namespace GoatNumerals
 {
-    using static LanguageExt.Prelude;
-
     public static class GoatNumeralsConverter
     {
         private static readonly Dictionary<int, string> IntToGoatNumerals = new()
@@ -24,7 +21,7 @@ namespace GoatNumerals
             {1, "M"}
         };
 
-        public static Option<string> Convert(int number)
+        public static string? Convert(int number)
         {
             if (number != 0)
             {
@@ -40,11 +37,11 @@ namespace GoatNumerals
                     }
                 }
 
-                return Some(goatNumerals.ToString());
+                return goatNumerals.ToString();
             }
             else
             {
-                return None;
+                return string.Empty;
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System.Text;
-using LanguageExt;
-using static LanguageExt.Prelude;
+using static System.String;
 
 namespace GoatNumerals
 {
@@ -26,8 +25,8 @@ namespace GoatNumerals
             {1, "M"}
         };
 
-        public static Option<string> Convert(int number)
-            => IsInRange(number) ? ConvertSafely(number) : None;
+        public static string Convert(int number)
+            => IsInRange(number) ? ConvertSafely(number) : Empty;
 
         private static bool IsInRange(int number) => number is >= Min and <= Max;
 

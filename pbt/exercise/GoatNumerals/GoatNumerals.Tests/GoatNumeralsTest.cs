@@ -1,6 +1,6 @@
 using FluentAssertions;
-using FluentAssertions.LanguageExt;
 using Xunit;
+using static System.String;
 using static GoatNumerals.GoatNumeralsConverter;
 
 namespace GoatNumerals.Tests
@@ -8,10 +8,10 @@ namespace GoatNumerals.Tests
     public class GoatNumeralsTest
     {
         [Fact]
-        public void GenerateNoneFor0()
+        public void GenerateEmptyFor0()
             => Convert(0)
                 .Should()
-                .BeNone();
+                .Be(Empty);
 
         [Theory]
         [InlineData(1, "M")]
@@ -28,6 +28,6 @@ namespace GoatNumerals.Tests
         public void GenerateGoatNumeralsForNumbers(int number, string expectedGoatNumeral)
             => Convert(number)
                 .Should()
-                .BeSome(x => x.Should().Be(expectedGoatNumeral));
+                .Be(expectedGoatNumeral);
     }
 }
