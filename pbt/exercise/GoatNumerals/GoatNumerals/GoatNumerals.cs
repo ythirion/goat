@@ -1,5 +1,10 @@
-﻿namespace GoatNumerals
+﻿using System.Text;
+using LanguageExt;
+
+namespace GoatNumerals
 {
+    using static LanguageExt.Prelude;
+
     public static class GoatNumeralsConverter
     {
         private static readonly Dictionary<int, string> IntToGoatNumerals = new()
