@@ -20,7 +20,7 @@ namespace Goat.Examples.Tests
             Classes().That()
                 .HaveAnyAttributes(typeof(ApiControllerAttribute))
                 .Should()
-                .ResideInNamespace("Controllers")
+                .ResideInNamespace("Controllers", true)
                 .Check();
 
         [Fact]
