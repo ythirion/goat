@@ -1,4 +1,4 @@
-﻿namespace Goat.Examples
+namespace Goat.Examples
 {
     public class ShittyMethods
     {

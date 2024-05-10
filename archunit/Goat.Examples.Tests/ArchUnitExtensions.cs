@@ -3,6 +3,7 @@ using ArchUnitNET.Fluent;
 using ArchUnitNET.Fluent.Syntax.Elements.Types;
 using ArchUnitNET.Loader;
 using ArchUnitNET.xUnit;
+using Goat.Examples.Services;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Goat.Examples.Tests
@@ -11,7 +12,7 @@ namespace Goat.Examples.Tests
     {
         private static readonly Architecture Architecture =
             new ArchLoader()
-                .LoadAssemblies(typeof(EmptyController).Assembly)
+                .LoadAssemblies(typeof(ServiceNotCompliant).Assembly)
                 .Build();
 
         public static GivenTypesConjunction TypesInAssembly() =>

@@ -34,9 +34,7 @@ namespace Goat.Architecture.Tests
             TypesIn("Domain").As("Enterprise Business Rules");
 
         [Fact(DisplayName = "Lower layers can not depend on outer layers")]
-        public void CheckRule() => DependencyRule.Check(Architecture);
-
-        private static IArchRule DependencyRule =>
+        public void CheckRule() =>
             Domain()
                 .Should()
                 .OnlyDependOn(Domain())
@@ -48,6 +46,6 @@ namespace Goat.Architecture.Tests
                 .And(
                     Controllers().Should()
                         .NotDependOnAny(Frameworks_Drivers())
-                );
+                ).Check(Architecture);
     }
 }

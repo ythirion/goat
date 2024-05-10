@@ -1,17 +1,18 @@
-﻿using Goat.Examples.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Goat.Examples.Controllers
+namespace Goat.Examples
 {
+    public record ApiError(string Code, string Message);
+
+    public record ApiResponse<TData>(TData Data, ApiError[]? Errors = null);
+
     [ApiController]
-    public class Controller
+    public class GoatControllerV2
     {
         public ApiResponse<int> Matching() => new ApiResponse<int>(42);
 
         public void NotMatching()
         {
         }
-
-        public int Universe() => 42;
     }
 }

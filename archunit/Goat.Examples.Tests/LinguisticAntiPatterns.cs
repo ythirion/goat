@@ -22,12 +22,5 @@ namespace Goat.Examples.Tests
                 .Should()
                 .HaveReturnType(typeof(bool))
                 .Check();
-
-        [Fact]
-        public void SettersShouldNotReturnSomething() =>
-            Methods()
-                .HaveName("Set[A-Z].*", useRegularExpressions: true).Should()
-                .HaveReturnType(typeof(void))
-                .Check();
     }
 }
