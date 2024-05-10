@@ -25,6 +25,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Goat.Architecture\Goat.Architecture.csproj"/>
+        <ProjectReference Include="..\Goat.Controllers\Goat.Controllers.csproj"/>
+        <ProjectReference Include="..\Goat.Domain\Goat.Domain.csproj"/>
+        <ProjectReference Include="..\Goat.Repositories\Goat.Repositories.csproj"/>
+        <ProjectReference Include="..\Goat.UseCases\Goat.UseCases.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -1,22 +1,25 @@
-﻿using ArchUnitNET.Fluent.Syntax.Elements.Types;
+﻿using ArchUnitNET.Fluent;
+using ArchUnitNET.Fluent.Syntax.Elements.Types;
 using ArchUnitNET.Loader;
 using ArchUnitNET.xUnit;
-using Goat.Architecture.Controllers;
 using Xunit;
-using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Goat.Architecture.Tests
 {
-    public class CleanArchitecture
+    public class SplitArchitecture
     {
         private static readonly ArchUnitNET.Domain.Architecture Architecture =
             new ArchLoader()
-                .LoadAssemblies(typeof(GoatController).Assembly)
+                .LoadAssemblies(
+                    typeof(Goat.Controllers.GoatController).Assembly,
+                    typeof(Goat.UseCases.FeedGoat).Assembly,
+                    typeof(Goat.Domain.Goat).Assembly,
+                    typeof(Goat.Repositories.GoatRepository).Assembly
+                )
                 .Build();
 
         private static GivenTypesConjunction TypesIn(string @namespace) =>
-            Types().That()
-                .ResideInNamespace(@namespace, true);
+            ArchRuleDefinition.Types().That().ResideInNamespace(@namespace, true);
 
         private static GivenTypesConjunctionWithDescription Controllers() =>
             TypesIn("Controllers").As("Interface Adapters");
@@ -27,13 +30,16 @@ namespace Goat.Architecture.Tests
         private static GivenTypesConjunctionWithDescription Frameworks_Drivers() =>
             TypesIn("Repositories").As("Framework & Drivers");
 
-        private static GivenTypesConjunctionWithDescription Entities() =>
+        private static GivenTypesConjunctionWithDescription Domain() =>
             TypesIn("Domain").As("Enterprise Business Rules");
 
         [Fact(DisplayName = "Lower layers can not depend on outer layers")]
-        public void DependencyRule() =>
-            Entities().Should()
-                .OnlyDependOn(Entities())
+        public void CheckRule() => DependencyRule.Check(Architecture);
+
+        private static IArchRule DependencyRule =>
+            Domain()
+                .Should()
+                .OnlyDependOn(Domain())
                 .And(
                     UseCases().Should()
                         .NotDependOnAny(Controllers()).AndShould()
@@ -42,7 +48,6 @@ namespace Goat.Architecture.Tests
                 .And(
                     Controllers().Should()
                         .NotDependOnAny(Frameworks_Drivers())
-                )
-                .Check(Architecture);
+                );
     }
 }
