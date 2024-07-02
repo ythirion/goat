@@ -96,6 +96,8 @@ namespace LordOfTheRings
                         else
                         {
                             character.C = region;
+                            if (region != "Mordor") Console.WriteLine($"{character.N} moved to {region}.");
+                            else Console.WriteLine($"{character.N} moved to {region} 💀.");
                         }
                     }
                 }

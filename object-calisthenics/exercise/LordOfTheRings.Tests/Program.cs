@@ -3,8 +3,18 @@ using Xunit.Abstractions;
 
 namespace LordOfTheRings.Tests
 {
-    public class Program(ITestOutputHelper testOutputHelper)
+    public class Program
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly StringWriter _output;
+
+        public Program(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            _output = new StringWriter();
+            Console.SetOut(_output);
+        }
+
         [Fact]
         public void Main()
         {
@@ -18,21 +28,23 @@ namespace LordOfTheRings.Tests
                 fellowship.AddMember(new Character {N = "Pippin", R = "Hobbit", W = "Bow"});
 
                 fellowship.AddMember(new Character {N = "Aragorn", R = "Human", W = "Anduril"});
-                fellowship.AddMember(new Character {N = "Boromir the Brave", R = "Human", W = "Sword"});
+                fellowship.AddMember(new Character {N = "Boromir", R = "Human", W = "Sword"});
 
                 fellowship.AddMember(new Character {N = "Legolas", R = "Elf", W = "Bow"});
                 fellowship.AddMember(new Character {N = "Gimli", R = "Dwarf", W = "Axe"});
 
                 fellowship.AddMember(new Character {N = "Gandalf the 🐐", R = "Wizard", W = "Staff"});
+
+                Console.WriteLine(fellowship.ToString());
             }
             catch (Exception ex)
             {
-                testOutputHelper.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
-            var group1 = new List<string> {"Billy Baggins", "Gruffson", "Nannywise Gamgee"};
-            var group2 = new List<string> {"Chewy Brandybuck", "Bleaty Took", "Aragorn", "Boromir the Brave"};
-            var group3 = new List<string> {"Legolas", "Gimli", "Gandalf the Goat"};
+            var group1 = new List<string> {"Frodo", "Sam"};
+            var group2 = new List<string> {"Merry", "Pippin", "Aragorn", "Boromir"};
+            var group3 = new List<string> {"Legolas", "Gimli", "Gandalf the 🐐"};
 
             fellowship.MoveMembersToRegion(group1, "Rivendell");
             fellowship.MoveMembersToRegion(group2, "Moria");
@@ -40,13 +52,13 @@ namespace LordOfTheRings.Tests
 
             try
             {
-                var group4 = new List<string> {"Billy Baggins", "Aragorn"};
+                var group4 = new List<string> {"Frodo", "Sam"};
                 fellowship.MoveMembersToRegion(group4, "Mordor");
-                fellowship.MoveMembersToRegion(group4, "Shire"); // This should fail for "Billy Baggins"
+                fellowship.MoveMembersToRegion(group4, "Shire"); // This should fail for "Frodo"
             }
             catch (Exception ex)
             {
-                testOutputHelper.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
             fellowship.PrintMembersInRegion("Rivendell");
@@ -55,19 +67,17 @@ namespace LordOfTheRings.Tests
             fellowship.PrintMembersInRegion("Mordor");
             fellowship.PrintMembersInRegion("Shire");
 
-            testOutputHelper.WriteLine(fellowship.ToString());
-
             try
             {
-                fellowship.RemoveMember("Billy Baggins");
-                fellowship.RemoveMember("Samwise Goatgee"); // This should throw an exception
+                fellowship.RemoveMember("Frodo");
+                fellowship.RemoveMember("Sam"); // This should throw an exception
             }
             catch (Exception ex)
             {
-                testOutputHelper.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
-            testOutputHelper.WriteLine(fellowship.ToString());
+            _testOutputHelper.WriteLine(_output.ToString());
         }
     }
 }
