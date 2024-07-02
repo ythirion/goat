@@ -3,8 +3,18 @@ using Xunit.Abstractions;
 
 namespace LordOfTheRings.Tests
 {
-    public class Program(ITestOutputHelper testOutputHelper)
+    public class Program
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly StringWriter _output;
+
+        public Program(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            _output = new StringWriter();
+            Console.SetOut(_output);
+        }
+
         [Fact]
         public void Main()
         {
@@ -27,7 +37,7 @@ namespace LordOfTheRings.Tests
             }
             catch (Exception ex)
             {
-                testOutputHelper.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
             var group1 = new List<string> {"Billy Baggins", "Gruffson", "Nannywise Gamgee"};
@@ -46,7 +56,7 @@ namespace LordOfTheRings.Tests
             }
             catch (Exception ex)
             {
-                testOutputHelper.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
             fellowship.PrintMembersInRegion("Rivendell");
@@ -55,7 +65,7 @@ namespace LordOfTheRings.Tests
             fellowship.PrintMembersInRegion("Mordor");
             fellowship.PrintMembersInRegion("Shire");
 
-            testOutputHelper.WriteLine(fellowship.ToString());
+            Console.WriteLine(fellowship.ToString());
 
             try
             {
@@ -64,10 +74,12 @@ namespace LordOfTheRings.Tests
             }
             catch (Exception ex)
             {
-                testOutputHelper.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
-            testOutputHelper.WriteLine(fellowship.ToString());
+            Console.WriteLine(fellowship.ToString());
+
+            _testOutputHelper.WriteLine(_output.ToString());
         }
     }
 }
