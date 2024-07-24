@@ -91,7 +91,7 @@ namespace LordOfTheRings
                         if (character.C == "Mordor" && region != "Mordor")
                         {
                             throw new InvalidOperationException(
-                                $"Cannot move {character.N} from Mordor to {region}. Reason: There is no coming back.");
+                                $"Cannot move {character.N} from Mordor to {region}. Reason: There is no coming back from Mordor.");
                         }
                         else
                         {
@@ -115,10 +115,17 @@ namespace LordOfTheRings
                 }
             }
 
-            Console.WriteLine($"Members in {region}:");
-            foreach (var character in charactersInRegion)
+            if (charactersInRegion.Count > 0)
             {
-                Console.WriteLine($"{character.N} ({character.R}) with {character.W}");
+                Console.WriteLine($"Members in {region}:");
+                foreach (var character in charactersInRegion)
+                {
+                    Console.WriteLine($"{character.N} ({character.R}) with {character.W}");
+                }
+            }
+            else if (charactersInRegion.Count == 0)
+            {
+                Console.WriteLine($"No members in {region}");
             }
         }
 
