@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LordOfTheRings", "LordOfThe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LordOfTheRings.App", "LordOfTheRings.App\LordOfTheRings.App.csproj", "{493627F6-F862-4CFE-8F53-47158C89F71F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LordOfTheRings.Tests", "LordOfTheRings.Tests\LordOfTheRings.Tests.csproj", "{C76CA6B1-E423-4439-BA2F-8467E676752D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{493627F6-F862-4CFE-8F53-47158C89F71F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{493627F6-F862-4CFE-8F53-47158C89F71F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{493627F6-F862-4CFE-8F53-47158C89F71F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C76CA6B1-E423-4439-BA2F-8467E676752D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C76CA6B1-E423-4439-BA2F-8467E676752D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C76CA6B1-E423-4439-BA2F-8467E676752D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C76CA6B1-E423-4439-BA2F-8467E676752D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

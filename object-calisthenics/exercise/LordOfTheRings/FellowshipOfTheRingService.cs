@@ -18,9 +18,17 @@ namespace LordOfTheRings
             {
                 throw new ArgumentException("Character must have a race.");
             }
-            else if (string.IsNullOrWhiteSpace(character.W))
+            else if (character.W == null)
             {
                 throw new ArgumentException("Character must have a weapon.");
+            }
+            else if (string.IsNullOrWhiteSpace(character.W.Name))
+            {
+                throw new ArgumentException("A weapon must have a name.");
+            }
+            else if (character.W.Damage <= 0)
+            {
+                throw new ArgumentException("A weapon must have a damage level.");
             }
             else
             {
@@ -46,13 +54,17 @@ namespace LordOfTheRings
             }
         }
 
-        public void UpdateCharacterWeapon(string name, string newWeapon)
+        public void UpdateCharacterWeapon(string name, string newWeapon, int damage)
         {
             foreach (var character in members)
             {
                 if (character.N == name)
                 {
-                    character.W = newWeapon;
+                    character.W = new Weapon
+                    {
+                        Name = newWeapon,
+                        Damage = damage
+                    };
                     break;
                 }
             }
@@ -120,7 +132,7 @@ namespace LordOfTheRings
                 Console.WriteLine($"Members in {region}:");
                 foreach (var character in charactersInRegion)
                 {
-                    Console.WriteLine($"{character.N} ({character.R}) with {character.W}");
+                    Console.WriteLine($"{character.N} ({character.R}) with {character.W.Name}");
                 }
             }
             else if (charactersInRegion.Count == 0)
@@ -134,7 +146,7 @@ namespace LordOfTheRings
             var result = "Fellowship of the Ring Members:\n";
             foreach (var member in members)
             {
-                result += member + "\n";
+                result += $"{member.N} ({member.R}) with {member.W.Name} in {member.C}" + "\n";
             }
 
             return result;

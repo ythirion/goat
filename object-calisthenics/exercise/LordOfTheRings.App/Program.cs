@@ -4,18 +4,86 @@ var fellowship = new FellowshipOfTheRingService();
 
 try
 {
-    fellowship.AddMember(new Character {N = "Frodo", R = "Hobbit", W = "Sting"});
-    fellowship.AddMember(new Character {N = "Sam", R = "Hobbit", W = "Dagger"});
-    fellowship.AddMember(new Character {N = "Merry", R = "Hobbit", W = "Short Sword"});
-    fellowship.AddMember(new Character {N = "Pippin", R = "Hobbit", W = "Bow"});
+    fellowship.AddMember(new Character
+    {
+        N = "Frodo", R = "Hobbit", W = new Weapon
+        {
+            Name = "Sting",
+            Damage = 30
+        }
+    });
 
-    fellowship.AddMember(new Character {N = "Aragorn", R = "Human", W = "Anduril"});
-    fellowship.AddMember(new Character {N = "Boromir", R = "Human", W = "Sword"});
+    fellowship.AddMember(new Character
+    {
+        N = "Sam", R = "Hobbit", W = new Weapon
+        {
+            Name = "Dagger",
+            Damage = 10
+        }
+    });
 
-    fellowship.AddMember(new Character {N = "Legolas", R = "Elf", W = "Bow"});
-    fellowship.AddMember(new Character {N = "Gimli", R = "Dwarf", W = "Axe"});
 
-    fellowship.AddMember(new Character {N = "Gandalf the 🐐", R = "Wizard", W = "Staff"});
+    fellowship.AddMember(new Character
+    {
+        N = "Merry", R = "Hobbit", W = new Weapon
+        {
+            Name = "Short Sword",
+            Damage = 24
+        }
+    });
+
+    fellowship.AddMember(new Character
+    {
+        N = "Pippin", R = "Hobbit", W = new Weapon
+        {
+            Name = "Bow",
+            Damage = 8
+        }
+    });
+
+    fellowship.AddMember(new Character
+    {
+        N = "Aragorn", R = "Human", W = new Weapon
+        {
+            Name = "Anduril",
+            Damage = 100
+        }
+    });
+    fellowship.AddMember(new Character
+    {
+        N = "Boromir", R = "Human", W = new Weapon
+        {
+            Name = "Sword",
+            Damage = 90
+        }
+    });
+
+    fellowship.AddMember(new Character
+    {
+        N = "Legolas", R = "Elf", W = new Weapon
+        {
+            Name = "Bow",
+            Damage = 100
+        }
+    });
+
+    fellowship.AddMember(new Character
+    {
+        N = "Gimli", R = "Dwarf", W = new Weapon
+        {
+            Name = "Axe",
+            Damage = 100
+        }
+    });
+
+    fellowship.AddMember(new Character
+    {
+        N = "Gandalf the 🐐", R = "Wizard", W = new Weapon
+        {
+            Name = "Staff",
+            Damage = 200
+        }
+    });
 
     Console.WriteLine(fellowship.ToString());
 }
