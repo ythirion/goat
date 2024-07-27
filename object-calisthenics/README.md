@@ -315,3 +315,17 @@ public class FellowshipOfTheRingService
         => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + $"{member.N} ({member.R}) with {member.W.Name} in {member.C}\n");
 }
 ```
+
+## Don't Abbreviate
+We adapt the code from the caller `FellowshipOfTheRingService`.
+Abbreviations were declared in the `Character` class:
+
+```csharp
+public sealed class Character
+{
+    public string Name { get; set; }
+    public string Race { get; set; }
+    public Weapon Weapon { get; set; }
+    public string CurrentLocation { get; set; } = "Shire";
+}
+```

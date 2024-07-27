@@ -7,23 +7,23 @@ namespace LordOfTheRings
 
         public void AddMember(Character character)
         {
-            if (string.IsNullOrWhiteSpace(character.N))
+            if (string.IsNullOrWhiteSpace(character.Name))
             {
                 throw new ArgumentException("Character must have a name.");
             }
-            if (string.IsNullOrWhiteSpace(character.R))
+            if (string.IsNullOrWhiteSpace(character.Race))
             {
                 throw new ArgumentException("Character must have a race.");
             }
-            if (character.W == null)
+            if (character.Weapon == null)
             {
                 throw new ArgumentException("Character must have a weapon.");
             }
-            if (string.IsNullOrWhiteSpace(character.W.Name))
+            if (string.IsNullOrWhiteSpace(character.Weapon.Name))
             {
                 throw new ArgumentException("A weapon must have a name.");
             }
-            if (character.W.Damage <= 0)
+            if (character.Weapon.Damage <= 0)
             {
                 throw new ArgumentException("A weapon must have a damage level.");
             }
@@ -31,7 +31,7 @@ namespace LordOfTheRings
             var exists = false;
             foreach (var member in _members)
             {
-                if (member.N == character.N)
+                if (member.Name == character.Name)
                 {
                     exists = true;
                     break;
@@ -52,7 +52,7 @@ namespace LordOfTheRings
             Character? characterToRemove = null;
             foreach (var character in _members)
             {
-                if (character.N == name)
+                if (character.Name == name)
                 {
                     characterToRemove = character;
                     break;
@@ -73,19 +73,19 @@ namespace LordOfTheRings
             {
                 foreach (var character in _members)
                 {
-                    if (character.N != name) continue;
+                    if (character.Name != name) continue;
                     
-                    if (character.C == Mordor && region != Mordor)
+                    if (character.CurrentLocation == Mordor && region != Mordor)
                     {
                         throw new InvalidOperationException(
-                            $"Cannot move {character.N} from Mordor to {region}. Reason: There is no coming back from Mordor.");
+                            $"Cannot move {character.Name} from Mordor to {region}. Reason: There is no coming back from Mordor.");
                     }
 
-                    character.C = region;
+                    character.CurrentLocation = region;
                         
                     Console.WriteLine(region != Mordor
-                        ? $"{character.N} moved to {region}."
-                        : $"{character.N} moved to {region} 💀.");
+                        ? $"{character.Name} moved to {region}."
+                        : $"{character.Name} moved to {region} 💀.");
                 }
             }
         }
@@ -95,7 +95,7 @@ namespace LordOfTheRings
             List<Character> charactersInRegion = new List<Character>();
             foreach (var character in _members)
             {
-                if (character.C == region)
+                if (character.CurrentLocation == region)
                 {
                     charactersInRegion.Add(character);
                 }
@@ -106,7 +106,7 @@ namespace LordOfTheRings
                 Console.WriteLine($"Members in {region}:");
                 foreach (var character in charactersInRegion)
                 {
-                    Console.WriteLine($"{character.N} ({character.R}) with {character.W.Name}");
+                    Console.WriteLine($"{character.Name} ({character.Race}) with {character.Weapon.Name}");
                 }
             }
             else if (charactersInRegion is [])
@@ -116,6 +116,6 @@ namespace LordOfTheRings
         }
 
         public override string ToString() 
-            => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + $"{member.N} ({member.R}) with {member.W.Name} in {member.C}\n");
+            => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + $"{member.Name} ({member.Race}) with {member.Weapon.Name} in {member.CurrentLocation}\n");
     }
 }

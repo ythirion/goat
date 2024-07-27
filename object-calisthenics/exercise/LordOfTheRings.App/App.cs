@@ -10,7 +10,7 @@ namespace LordOfTheRings.App
             {
                 fellowship.AddMember(new Character
                 {
-                    N = "Frodo", R = "Hobbit", W = new Weapon
+                    Name = "Frodo", Race = "Hobbit", Weapon = new Weapon
                     {
                         Name = "Sting",
                         Damage = 30
@@ -19,7 +19,7 @@ namespace LordOfTheRings.App
 
                 fellowship.AddMember(new Character
                 {
-                    N = "Sam", R = "Hobbit", W = new Weapon
+                    Name = "Sam", Race = "Hobbit", Weapon = new Weapon
                     {
                         Name = "Dagger",
                         Damage = 10
@@ -29,7 +29,7 @@ namespace LordOfTheRings.App
 
                 fellowship.AddMember(new Character
                 {
-                    N = "Merry", R = "Hobbit", W = new Weapon
+                    Name = "Merry", Race = "Hobbit", Weapon = new Weapon
                     {
                         Name = "Short Sword",
                         Damage = 24
@@ -38,7 +38,7 @@ namespace LordOfTheRings.App
 
                 fellowship.AddMember(new Character
                 {
-                    N = "Pippin", R = "Hobbit", W = new Weapon
+                    Name = "Pippin", Race = "Hobbit", Weapon = new Weapon
                     {
                         Name = "Bow",
                         Damage = 8
@@ -47,7 +47,7 @@ namespace LordOfTheRings.App
 
                 fellowship.AddMember(new Character
                 {
-                    N = "Aragorn", R = "Human", W = new Weapon
+                    Name = "Aragorn", Race = "Human", Weapon = new Weapon
                     {
                         Name = "Anduril",
                         Damage = 100
@@ -55,7 +55,7 @@ namespace LordOfTheRings.App
                 });
                 fellowship.AddMember(new Character
                 {
-                    N = "Boromir", R = "Human", W = new Weapon
+                    Name = "Boromir", Race = "Human", Weapon = new Weapon
                     {
                         Name = "Sword",
                         Damage = 90
@@ -64,7 +64,7 @@ namespace LordOfTheRings.App
 
                 fellowship.AddMember(new Character
                 {
-                    N = "Legolas", R = "Elf", W = new Weapon
+                    Name = "Legolas", Race = "Elf", Weapon = new Weapon
                     {
                         Name = "Bow",
                         Damage = 100
@@ -73,7 +73,7 @@ namespace LordOfTheRings.App
 
                 fellowship.AddMember(new Character
                 {
-                    N = "Gimli", R = "Dwarf", W = new Weapon
+                    Name = "Gimli", Race = "Dwarf", Weapon = new Weapon
                     {
                         Name = "Axe",
                         Damage = 100
@@ -82,7 +82,7 @@ namespace LordOfTheRings.App
 
                 fellowship.AddMember(new Character
                 {
-                    N = "Gandalf the 🐐", R = "Wizard", W = new Weapon
+                    Name = "Gandalf the 🐐", Race = "Wizard", Weapon = new Weapon
                     {
                         Name = "Staff",
                         Damage = 200
