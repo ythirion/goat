@@ -1,7 +1,8 @@
-namespace LordOfTheRings;
-
-public class Weapon
+namespace LordOfTheRings
 {
-    public string Name { get; set; }
-    public int Damage { get; set; }
+    public class Weapon
+    {
+        public string Name { get; set; }
+        public int Damage { get; set; }
+    }
 }
