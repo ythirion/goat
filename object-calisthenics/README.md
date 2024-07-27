@@ -329,3 +329,232 @@ public sealed class Character
     public string CurrentLocation { get; set; } = "Shire";
 }
 ```
+
+## Wrap All Primitives And Strings
+There are plenty of Primitives used in the `Domain`...
+We can use the [`Sprout` Technique](https://understandlegacycode.com/blog/key-points-of-working-effectively-with-legacy-code/#1-the-sprout-technique) to design new types using [T.D.D](https://tidyfirst.substack.com/p/canon-tdd).
+It means that we will design our types on the side of the production code.
+
+The interest of those types is to make impossible to instantiate an object in an invalid state.
+To do so, let's apply [`Parse Don't Validate`](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/) technique to design our code.
+
+### Name
+`Name` is a `string` let's design a new class containing a parsing method.
+
+🔴 Add a first test:
+
+```csharp
+[Fact]
+public void Parse_A_Valid_Name()
+{
+    var aValidName = "A valid name because not empty";
+    // Name will contain a Parse method with this signature: string -> Name (or Exception 😱)
+    // We will go back to exceptions in a few steps
+    Name.Parse(aValidName)
+        .ToString()
+        .Should()
+        .Be(aValidName);
+}
+```
+
+It is red because, the code does not compile:
+
+![Code does not compile](img/failing-tdd-test.png)
+
+🟢 We generate the class from the test and iterate on it to math the test pass
+
+```csharp
+public sealed class Name
+{
+    private readonly string _value;
+    private Name(string value) => _value = value;
+    // Parse is the only way to instantiate it (Factory Method)
+    public static Name Parse(string value) => new(value);
+    public override string ToString() => _value;
+}
+```
+
+🔵 We can refactor our test to use a [`property`](https://xtrem-tdd.netlify.app/Flavours/Testing/pbt) instead of an example
+
+We may express this property like this
+```text
+for any non empty text
+such that parseName is successfull 
+```
+
+We use `FsCheck` and results in:
+
+```csharp
+// Express how to generate valid names
+private static Arbitrary<string> NonEmptyString() => Arb.Default.String()
+    .Filter(str => !string.IsNullOrWhiteSpace(str));
+
+[Fact]
+public void Parse_A_Valid_Name()
+    => Prop.ForAll(
+        NonEmptyString(),
+        validName => Name.Parse(validName).ToString() == validName)
+        .QuickCheckThrowOnFailure();
+```
+
+🔴 Let's add a second test
+
+```csharp
+[Fact]
+public void Fail_To_Parse_Empty_Name()
+{
+    var act = () => Name.Parse(string.Empty);
+    act.Should()
+        .Throw<ArgumentException>()
+        .WithMessage("A name can not be empty.");
+}
+```
+
+🟢 Let's adapt the `Name` class
+
+```csharp
+public static Name Parse(string value)
+{
+    if (string.IsNullOrWhiteSpace(value))
+    {
+        throw new ArgumentException("A name can not be empty.");
+    }
+    return new Name(value);
+}
+```
+
+We finish by adding `Equality` on this type and and an extension method on `string`:
+
+```csharp
+public sealed class Name
+{
+    private readonly string _value;
+    private Name(string value) => _value = value;
+    public static Name Parse(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException("A name can not be empty.");
+        }
+        return new Name(value);
+    }
+
+    public override string ToString() => _value;
+    
+    #region Equality operators
+
+    private bool Equals(Name other) => _value == other._value;
+    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is Name other && Equals(other);
+    public override int GetHashCode() => _value.GetHashCode();
+
+    #endregion
+}
+
+public static class NameExtensions
+{
+    public static Name ToName(this string value) => Name.Parse(value);
+}
+```
+
+We are now ready to use it in the production code.
+To do so, we change the type in the `Character` class:
+
+```csharp
+public sealed class Character
+{
+    public Name Name { get; set; }
+    public string Race { get; set; }
+    public Weapon Weapon { get; set; }
+    public string CurrentLocation { get; set; } = "Shire";
+}
+```
+
+Then, the compiler helps us to move on:
+
+![Compiler errors](img/compile-errors.png)
+
+We adapt the production code that looks like this now:
+```csharp
+public static void Run()
+{
+    var fellowship = new FellowshipOfTheRingService();
+
+    try
+    {
+        fellowship.AddMember(new Character
+        {
+            Name = "Frodo".ToName(), Race = "Hobbit", Weapon = new Weapon
+            {
+                Name = "Sting",
+                Damage = 30
+            }
+        });
+
+        fellowship.AddMember(new Character
+        {
+            Name = "Sam".ToName(), Race = "Hobbit", Weapon = new Weapon
+            {
+                Name = "Dagger",
+                Damage = 10
+            }
+        });
+        ...
+```
+
+### Race
+Let's move on another `string` used in the system: `Race`.
+Here, there is a finite number of possible values and yet it is expressed as an infinite one: `string`.
+
+Let's use an `enum` to represent the possible values:
+
+```csharp
+public enum Race
+{
+    Hobbit,
+    Human,
+    Elf,
+    Dwarf,
+    Wizard
+}
+```
+
+### After a few iterations
+After having created dedicated types for primitives and string for our `Domain` it looks like this:
+
+![Domain types](img/domain-types.png)
+
+It expresses way much what is going on and we have remove a lot of code from the `Service` (Guard clauses):
+
+```csharp
+public void AddMember(Character character)
+{
+    var exists = false;
+    foreach (var member in _members)
+    {
+        if (member.Name == character.Name)
+        {
+            exists = true;
+            break;
+        }
+    }
+
+    if (exists)
+    {
+        throw new InvalidOperationException(
+            "A character with the same name already exists in the fellowship.");
+    }
+
+    _members.Add(character);
+}
+```
+
+The remaining primitive types in the `Service` are coming from the outside world and needs to be parsed.
+We may encapsulate those in command objects to make it more cohesive (let's keep it in mind for later on).
+
+```csharp
+// Why is a domain object passed here?
+public void AddMember(Character character)
+public void RemoveMember(string name)
+public void MoveMembersToRegion(List<string> memberNames, string region)
+public void PrintMembersInRegion(string region)
+```

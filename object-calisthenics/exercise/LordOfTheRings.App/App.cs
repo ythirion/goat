@@ -1,3 +1,5 @@
+using LordOfTheRings.Domain;
+
 namespace LordOfTheRings.App
 {
     public static class App
@@ -10,82 +12,82 @@ namespace LordOfTheRings.App
             {
                 fellowship.AddMember(new Character
                 {
-                    Name = "Frodo", Race = "Hobbit", Weapon = new Weapon
+                    Name = "Frodo".ToName(), Race = Race.Hobbit, Weapon = new Weapon
                     {
-                        Name = "Sting",
-                        Damage = 30
+                        Name = "Sting".ToName(),
+                        Damage = 30.ToDamage()
                     }
                 });
 
                 fellowship.AddMember(new Character
                 {
-                    Name = "Sam", Race = "Hobbit", Weapon = new Weapon
+                    Name = "Sam".ToName(), Race = Race.Hobbit, Weapon = new Weapon
                     {
-                        Name = "Dagger",
-                        Damage = 10
+                        Name = "Dagger".ToName(),
+                        Damage = 10.ToDamage()
                     }
                 });
 
 
                 fellowship.AddMember(new Character
                 {
-                    Name = "Merry", Race = "Hobbit", Weapon = new Weapon
+                    Name = "Merry".ToName(), Race = Race.Hobbit, Weapon = new Weapon
                     {
-                        Name = "Short Sword",
-                        Damage = 24
+                        Name = "Short Sword".ToName(),
+                        Damage = 24.ToDamage()
                     }
                 });
 
                 fellowship.AddMember(new Character
                 {
-                    Name = "Pippin", Race = "Hobbit", Weapon = new Weapon
+                    Name = "Pippin".ToName(), Race = Race.Hobbit, Weapon = new Weapon
                     {
-                        Name = "Bow",
-                        Damage = 8
+                        Name = "Bow".ToName(),
+                        Damage = 8.ToDamage()
                     }
                 });
 
                 fellowship.AddMember(new Character
                 {
-                    Name = "Aragorn", Race = "Human", Weapon = new Weapon
+                    Name = "Aragorn".ToName(), Race = Race.Human, Weapon = new Weapon
                     {
-                        Name = "Anduril",
-                        Damage = 100
+                        Name = "Anduril".ToName(),
+                        Damage = 100.ToDamage()
                     }
                 });
                 fellowship.AddMember(new Character
                 {
-                    Name = "Boromir", Race = "Human", Weapon = new Weapon
+                    Name = "Boromir".ToName(), Race = Race.Human, Weapon = new Weapon
                     {
-                        Name = "Sword",
-                        Damage = 90
-                    }
-                });
-
-                fellowship.AddMember(new Character
-                {
-                    Name = "Legolas", Race = "Elf", Weapon = new Weapon
-                    {
-                        Name = "Bow",
-                        Damage = 100
+                        Name = "Sword".ToName(),
+                        Damage = 90.ToDamage()
                     }
                 });
 
                 fellowship.AddMember(new Character
                 {
-                    Name = "Gimli", Race = "Dwarf", Weapon = new Weapon
+                    Name = "Legolas".ToName(), Race = Race.Elf, Weapon = new Weapon
                     {
-                        Name = "Axe",
-                        Damage = 100
+                        Name = "Bow".ToName(),
+                        Damage = 100.ToDamage()
                     }
                 });
 
                 fellowship.AddMember(new Character
                 {
-                    Name = "Gandalf the 🐐", Race = "Wizard", Weapon = new Weapon
+                    Name = "Gimli".ToName(), Race = Race.Dwarf, Weapon = new Weapon
                     {
-                        Name = "Staff",
-                        Damage = 200
+                        Name = "Axe".ToName(),
+                        Damage = 100.ToDamage()
+                    }
+                });
+
+                fellowship.AddMember(new Character
+                {
+                    Name = "Gandalf the 🐐".ToName(), Race = Race.Wizard, Weapon = new Weapon
+                    {
+                        Name = "Staff".ToName(),
+                        Damage = 200.ToDamage()
                     }
                 });
 

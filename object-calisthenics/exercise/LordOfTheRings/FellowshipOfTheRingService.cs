@@ -1,33 +1,13 @@
+using LordOfTheRings.Domain;
+
 namespace LordOfTheRings
 {
     public class FellowshipOfTheRingService
     {
-        private const string Mordor = "Mordor";
         private readonly List<Character> _members = [];
 
         public void AddMember(Character character)
         {
-            if (string.IsNullOrWhiteSpace(character.Name))
-            {
-                throw new ArgumentException("Character must have a name.");
-            }
-            if (string.IsNullOrWhiteSpace(character.Race))
-            {
-                throw new ArgumentException("Character must have a race.");
-            }
-            if (character.Weapon == null)
-            {
-                throw new ArgumentException("Character must have a weapon.");
-            }
-            if (string.IsNullOrWhiteSpace(character.Weapon.Name))
-            {
-                throw new ArgumentException("A weapon must have a name.");
-            }
-            if (character.Weapon.Damage <= 0)
-            {
-                throw new ArgumentException("A weapon must have a damage level.");
-            }
-            
             var exists = false;
             foreach (var member in _members)
             {
@@ -69,21 +49,22 @@ namespace LordOfTheRings
 
         public void MoveMembersToRegion(List<string> memberNames, string region)
         {
+            var regionValue = region.ToRegion();
             foreach (var name in memberNames)
             {
                 foreach (var character in _members)
                 {
                     if (character.Name != name) continue;
-                    
-                    if (character.CurrentLocation == Mordor && region != Mordor)
+
+                    if (character.CurrentLocation == Region.Mordor && regionValue != Region.Mordor)
                     {
                         throw new InvalidOperationException(
                             $"Cannot move {character.Name} from Mordor to {region}. Reason: There is no coming back from Mordor.");
                     }
 
-                    character.CurrentLocation = region;
-                        
-                    Console.WriteLine(region != Mordor
+                    character.CurrentLocation = regionValue;
+
+                    Console.WriteLine(regionValue != Region.Mordor
                         ? $"{character.Name} moved to {region}."
                         : $"{character.Name} moved to {region} 💀.");
                 }
@@ -95,7 +76,7 @@ namespace LordOfTheRings
             List<Character> charactersInRegion = new List<Character>();
             foreach (var character in _members)
             {
-                if (character.CurrentLocation == region)
+                if (character.CurrentLocation == region.ToRegion())
                 {
                     charactersInRegion.Add(character);
                 }
@@ -115,7 +96,9 @@ namespace LordOfTheRings
             }
         }
 
-        public override string ToString() 
-            => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + $"{member.Name} ({member.Race}) with {member.Weapon.Name} in {member.CurrentLocation}\n");
+        public override string ToString()
+            => _members.Aggregate("Fellowship of the Ring Members:\n",
+                (current, member) =>
+                    current + $"{member.Name} ({member.Race}) with {member.Weapon.Name} in {member.CurrentLocation}\n");
     }
 }
