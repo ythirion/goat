@@ -1,12 +1,24 @@
 namespace LordOfTheRings.Domain
 {
-    public sealed class Character
+    public sealed class Character(Name name, Race race, Weapon weapon, Region currentLocation = Region.Shire)
     {
-        public Name Name { get; set; }
-        public Race Race { get; set; }
-        public Weapon Weapon { get; set; }
-        public Region CurrentLocation { get; set; } = Region.Shire;
+        public void Move(Region destination)
+        {
+            if (currentLocation == Region.Mordor && destination != Region.Mordor)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot move {name} from Mordor to {destination}. Reason: There is no coming back from Mordor.");
+            }
 
-        public override string ToString() => $"{Name} ({Race}) with {Weapon} in {CurrentLocation}";
+            currentLocation = destination;
+            Console.WriteLine(destination != Region.Mordor
+                ? $"{name} moved to {destination}."
+                : $"{name} moved to {destination} 💀.");
+        }
+
+        public bool HasName(Name other) => name == other;
+        public bool IsIn(Region region) => currentLocation == region;
+        public string ToStringWithoutRegion() => $"{name} ({race}) with {weapon}";
+        public override string ToString() => $"{ToStringWithoutRegion()} in {currentLocation}";
     }
 }

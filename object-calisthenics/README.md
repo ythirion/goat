@@ -909,3 +909,124 @@ public sealed class Fellowship
 ```
 
 ### Integrate the First Class collection
+We can now plug the collection in the `Service`:
+
+```csharp
+public class FellowshipOfTheRingService
+{
+    // Should be loaded from a Repository
+    private readonly Fellowship _fellowship = new();
+
+    public void AddMember(Character character) => _fellowship.AddMember(character);
+    public void RemoveMember(string name) => _fellowship.Remove(name.ToName());
+
+    public void MoveMembersToRegion(List<string> memberNames, string region)
+        => _fellowship.MoveTo(
+            region.ToRegion(),
+            memberNames.Select(m => m.ToName()).ToArray()
+        );
+
+    public void PrintMembersInRegion(string region) => _fellowship.PrintMembersInRegion(region.ToRegion());
+    public override string ToString() => _fellowship.ToString();
+}
+```
+
+The `Service` is now lighter and its responsibility is to `parse` the inputs and pass them to the `Domain`.
+If anything fails the service throws the exception.
+
+## No Getters/Setters/Properties
+> Where do we have Getters / Setters?
+
+We can use our `IDE` to start this refactoring:
+
+![Init Only Property](img/init-only.png)
+
+We end-up with:
+
+```csharp
+public sealed class Character(Name name, Race race, Weapon weapon, Region currentLocation = Region.Shire)
+{
+    public Name Name { get; } = name;
+    public Race Race { get; } = race;
+    public Weapon Weapon { get; } = weapon;
+    public Region CurrentLocation { get; set; } = currentLocation;
+
+    public override string ToString() => $"{Name} ({Race}) with {Weapon} in {CurrentLocation}";
+}
+
+public class Weapon(Name name, Damage damage)
+{
+    public Name Name { get; } = name;
+    public override string ToString() => Name.ToString();
+}
+```
+
+Then adapt the `App`:
+
+```csharp
+public static class App
+{
+    private static readonly FellowshipOfTheRingService Fellowship = new();
+
+    public static void Run()
+    {
+        try
+        {
+            AddMember("Frodo", Race.Hobbit, "Sting", 30);
+            AddMember("Sam", Race.Hobbit, "Dagger", 10);
+            AddMember("Merry", Race.Hobbit, "Short Sword", 24);
+            AddMember("Pippin", Race.Hobbit, "Bow", 8);
+            AddMember("Aragorn", Race.Human, "Anduril", 100);
+            AddMember("Boromir", Race.Human, "Sword", 90);
+            AddMember("Legolas", Race.Elf, "Bow", 100);
+            AddMember("Gimli", Race.Dwarf, "Axe", 100);
+            AddMember("Gandalf the 🐐", Race.Wizard, "Staff", 200);
+
+            ...
+    }
+
+    private static void AddMember(
+        string name,
+        Race race,
+        string weapon,
+        int damage)
+        => Fellowship.AddMember(new Character(name.ToName(), race, new Weapon(weapon.ToName(), damage.ToDamage())));
+}
+```
+
+And the `CharacterBuilder` (remember the interception point serving as a Façade to instantiate Domain Objects):
+
+```csharp
+public Character Build() => new(
+    _name.ToName(),
+    _race ?? Race.Hobbit,
+    new Weapon((_weapon ?? "Sting").ToName(), Faker.RandomNumber.Next(0, 200).ToDamage()),
+    _region ?? Region.Shire
+);
+```
+
+Then, we move the behaviors related to the properties exposed to the `Character` entity:
+
+```csharp
+public sealed class Character(Name name, Race race, Weapon weapon, Region currentLocation = Region.Shire)
+{
+    public void Move(Region destination)
+    {
+        if (currentLocation == Region.Mordor && destination != Region.Mordor)
+        {
+            throw new InvalidOperationException(
+                $"Cannot move {name} from Mordor to {destination}. Reason: There is no coming back from Mordor.");
+        }
+
+        currentLocation = destination;
+        Console.WriteLine(destination != Region.Mordor
+            ? $"{name} moved to {destination}."
+            : $"{name} moved to {destination} 💀.");
+    }
+
+    public bool HasName(Name other) => name == other;
+    public bool IsIn(Region region) => currentLocation == region;
+    public string ToStringWithoutRegion() => $"{name} ({race}) with {weapon}";
+    public override string ToString() => $"{ToStringWithoutRegion()} in {currentLocation}";
+}
+```

@@ -17,12 +17,11 @@ namespace LordOfTheRings.Domain
 
         public Fellowship Remove(Name name)
         {
-            var characterToRemove = _members.FirstOrDefault(character => character.Name == name);
+            var characterToRemove = _members.FirstOrDefault(character => character.HasName(name));
             if (characterToRemove == null)
             {
                 throw new InvalidOperationException($"No character with the name '{name}' exists in the fellowship.");
             }
-
             _members.Remove(characterToRemove);
 
             return this;
@@ -33,30 +32,20 @@ namespace LordOfTheRings.Domain
 
         public Fellowship MoveTo(Region destination, params Name[] names)
         {
-            _members.Where(m => names.Contains(m.Name))
+            _members
+                .Where(character => ContainsCharacter(names, character))
                 .ToList()
-                .ForEach(character => MoveCharacter(character, destination));
+                .ForEach(character => character.Move(destination));
 
             return this;
         }
 
-        private static void MoveCharacter(Character character, Region destination)
-        {
-            if (character.CurrentLocation == Region.Mordor && destination != Region.Mordor)
-            {
-                throw new InvalidOperationException(
-                    $"Cannot move {character.Name} from Mordor to {destination}. Reason: There is no coming back from Mordor.");
-            }
-
-            character.CurrentLocation = destination;
-            Console.WriteLine(destination != Region.Mordor
-                ? $"{character.Name} moved to {destination}."
-                : $"{character.Name} moved to {destination} 💀.");
-        }
+        private static bool ContainsCharacter(Name[] names, Character character)
+            => names.ToList().Exists(character.HasName);
 
         public void PrintMembersInRegion(Region region)
         {
-            var charactersInRegion = _members.Where(m => m.CurrentLocation == region).ToList();
+            var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
 
             if (charactersInRegion.Count == 0)
             {
@@ -65,10 +54,10 @@ namespace LordOfTheRings.Domain
             }
 
             Console.WriteLine($"Members in {region}:");
-            foreach (var character in charactersInRegion)
-            {
-                Console.WriteLine($"{character.Name} ({character.Race}) with {character.Weapon.Name}");
-            }
+
+            charactersInRegion
+                .ToList()
+                .ForEach(character => Console.WriteLine(character.ToStringWithoutRegion()));
         }
     }
 }

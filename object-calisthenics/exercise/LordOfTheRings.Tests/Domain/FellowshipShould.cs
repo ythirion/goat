@@ -5,21 +5,25 @@ namespace LordOfTheRings.Tests.Domain
 {
     public class FellowshipShould
     {
+        private const string FrodoName = "Frodo";
+        private const string GandalfName = "Gandalf the 🐐";
+        private const string GimliName = "Gimli";
+
         private readonly Character _frodo = CharacterBuilder
-            .ACharacter("Frodo")
+            .ACharacter(FrodoName)
             .Hobbit()
             .Build();
 
         private readonly Character _gandalf =
             CharacterBuilder
-                .ACharacter("Gandalf the 🐐")
+                .ACharacter(GandalfName)
                 .With("Staff")
                 .Wizard()
                 .Build();
 
         private readonly Character _gimli =
             CharacterBuilder
-                .ACharacter("Gimli")
+                .ACharacter(GimliName)
                 .With("Axe")
                 .Dwarf()
                 .In(Region.Mordor)
@@ -51,7 +55,7 @@ namespace LordOfTheRings.Tests.Domain
         public void Remove_Existing_Member()
             => _fellowship
                 .AddMember(_frodo)
-                .Remove(_frodo.Name)
+                .Remove(FrodoName.ToName())
                 .ToString()
                 .Should()
                 .Be("Fellowship of the Ring Members:\n");
@@ -61,7 +65,7 @@ namespace LordOfTheRings.Tests.Domain
             => _fellowship
                 .AddMember(_frodo)
                 .AddMember(_gandalf)
-                .MoveTo(Region.Moria, _frodo.Name, _gandalf.Name)
+                .MoveTo(Region.Moria, FrodoName.ToName(), GandalfName.ToName())
                 .ToString()
                 .Should()
                 .BeEquivalentTo(
@@ -72,7 +76,7 @@ namespace LordOfTheRings.Tests.Domain
         {
             var moveGimliFromMordor = () => _fellowship
                 .AddMember(_gimli)
-                .MoveTo(Region.Lothlorien, _gimli.Name);
+                .MoveTo(Region.Lothlorien, GimliName.ToName());
 
             moveGimliFromMordor
                 .Should()

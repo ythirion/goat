@@ -1,6 +1,7 @@
 using FluentAssertions;
 using FsCheck;
 using LordOfTheRings.Domain;
+using static FsCheck.Arb.Default;
 
 namespace LordOfTheRings.Tests.Domain
 {
@@ -9,7 +10,8 @@ namespace LordOfTheRings.Tests.Domain
         [Fact]
         public void Parse_A_Valid_Name()
             => Prop.ForAll(
-                    Arb.Default.NonEmptyString(),
+                    NonEmptyString()
+                        .Filter(x => !string.IsNullOrWhiteSpace(x.Get)),
                     validName => Name.Parse(validName.Get).ToString() == validName.Get)
                 .QuickCheckThrowOnFailure();
 
@@ -21,7 +23,7 @@ namespace LordOfTheRings.Tests.Domain
                 .Throw<ArgumentException>()
                 .WithMessage("A name can not be empty.");
         }
-    
+
         [Fact]
         public void Two_Same_Names_Are_Equals()
         {
