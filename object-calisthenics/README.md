@@ -1030,3 +1030,15 @@ public sealed class Character(Name name, Race race, Weapon weapon, Region curren
     public override string ToString() => $"{ToStringWithoutRegion()} in {currentLocation}";
 }
 ```
+
+We have no more `Getters` nor `Setter` in our code.
+> It forced us to push the behaviors inside the business entities related to those behaviors. 
+
+## Remaining calisthenics
+- One Dot Per Line
+- Don't Use The ELSE Keyword
+- Only One Level Of Indentation Per Method
+- Keep All Entities Small
+- No Classes With More Than Two Instance Variables
+
+By designing codes outside from the current production code and plugging it, we ensure those calisthenics.
