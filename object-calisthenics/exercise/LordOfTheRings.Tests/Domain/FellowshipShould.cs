@@ -30,6 +30,7 @@ namespace LordOfTheRings.Tests.Domain
                 .Build();
 
         private readonly Fellowship _fellowship = new();
+        private readonly Action<string> _emptyLogger = _ => { };
 
         [Fact]
         public void Add_New_Member()
@@ -65,7 +66,7 @@ namespace LordOfTheRings.Tests.Domain
             => _fellowship
                 .AddMember(_frodo)
                 .AddMember(_gandalf)
-                .MoveTo(Region.Moria, FrodoName.ToName(), GandalfName.ToName())
+                .MoveTo(Region.Moria, _emptyLogger, FrodoName.ToName(), GandalfName.ToName())
                 .ToString()
                 .Should()
                 .BeEquivalentTo(
@@ -76,7 +77,7 @@ namespace LordOfTheRings.Tests.Domain
         {
             var moveGimliFromMordor = () => _fellowship
                 .AddMember(_gimli)
-                .MoveTo(Region.Lothlorien, GimliName.ToName());
+                .MoveTo(Region.Lothlorien, _emptyLogger, GimliName.ToName());
 
             moveGimliFromMordor
                 .Should()
@@ -85,24 +86,20 @@ namespace LordOfTheRings.Tests.Domain
                     $"Cannot move Gimli from Mordor to Lothlorien. Reason: There is no coming back from Mordor.");
         }
 
-
         [Fact]
-        public Task Print_Fellowship_Members_By_Region()
+        public Task Print_Fellowship_Members_By_Region_Without_Console()
         {
+            var log = new StringWriter();
+            Action<string> logger = s => log.WriteLine(s);
+
             var updatedFellowship = _fellowship
                 .AddMember(_frodo)
                 .AddMember(_gandalf)
                 .AddMember(_gimli);
 
-            var originalConsoleOut = Console.Out;
-            var log = new StringWriter();
-            Console.SetOut(log);
-
-            updatedFellowship.PrintMembersInRegion(Region.Mordor);
-            updatedFellowship.PrintMembersInRegion(Region.Shire);
-            updatedFellowship.PrintMembersInRegion(Region.Lothlorien);
-
-            Console.SetOut(originalConsoleOut);
+            updatedFellowship.PrintMembersInRegion(Region.Mordor, logger);
+            updatedFellowship.PrintMembersInRegion(Region.Shire, logger);
+            updatedFellowship.PrintMembersInRegion(Region.Lothlorien, logger);
 
             return Verify(log.ToString());
         }

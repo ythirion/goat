@@ -2,7 +2,7 @@ namespace LordOfTheRings.Domain
 {
     public sealed class Character(Name name, Race race, Weapon weapon, Region currentLocation = Region.Shire)
     {
-        public void Move(Region destination)
+        public void Move(Region destination, Logger logger)
         {
             if (currentLocation == Region.Mordor && destination != Region.Mordor)
             {
@@ -11,7 +11,7 @@ namespace LordOfTheRings.Domain
             }
 
             currentLocation = destination;
-            Console.WriteLine(destination != Region.Mordor
+            logger(destination != Region.Mordor
                 ? $"{name} moved to {destination}."
                 : $"{name} moved to {destination} 💀.");
         }

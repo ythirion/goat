@@ -38,6 +38,9 @@
         <None Update="Domain\FellowshipShould.Print_Fellowship_Members_By_Region.verified.txt">
             <DependentUpon>FellowshipShould.cs</DependentUpon>
         </None>
+        <None Update="Domain\FellowshipShould.Print_Fellowship_Members_By_Region_Without_Console.verified.txt">
+          <DependentUpon>FellowshipShould.cs</DependentUpon>
+        </None>
     </ItemGroup>
 
 </Project>

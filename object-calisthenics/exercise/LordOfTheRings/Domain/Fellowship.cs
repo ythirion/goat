@@ -1,6 +1,6 @@
 namespace LordOfTheRings.Domain
 {
-    public sealed class Fellowship
+    public sealed class Fellowship()
     {
         private readonly HashSet<Character> _members = [];
 
@@ -22,6 +22,7 @@ namespace LordOfTheRings.Domain
             {
                 throw new InvalidOperationException($"No character with the name '{name}' exists in the fellowship.");
             }
+
             _members.Remove(characterToRemove);
 
             return this;
@@ -30,12 +31,12 @@ namespace LordOfTheRings.Domain
         public override string ToString()
             => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + (member + "\n"));
 
-        public Fellowship MoveTo(Region destination, params Name[] names)
+        public Fellowship MoveTo(Region destination, Logger logger, params Name[] names)
         {
             _members
                 .Where(character => ContainsCharacter(names, character))
                 .ToList()
-                .ForEach(character => character.Move(destination));
+                .ForEach(character => character.Move(destination, logger));
 
             return this;
         }
@@ -43,21 +44,21 @@ namespace LordOfTheRings.Domain
         private static bool ContainsCharacter(Name[] names, Character character)
             => names.ToList().Exists(character.HasName);
 
-        public void PrintMembersInRegion(Region region)
+        public void PrintMembersInRegion(Region region, Logger logger)
         {
             var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
 
             if (charactersInRegion.Count == 0)
             {
-                Console.WriteLine($"No members in {region}");
+                logger($"No members in {region}");
                 return;
             }
 
-            Console.WriteLine($"Members in {region}:");
+            logger($"Members in {region}:");
 
             charactersInRegion
                 .ToList()
-                .ForEach(character => Console.WriteLine(character.ToStringWithoutRegion()));
+                .ForEach(character => logger(character.ToStringWithoutRegion()));
         }
     }
 }

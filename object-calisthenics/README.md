@@ -1042,3 +1042,223 @@ We have no more `Getters` nor `Setter` in our code.
 - No Classes With More Than Two Instance Variables
 
 By designing codes outside from the current production code and plugging it, we ensure those calisthenics.
+
+## Other refactorings
+> What can still be improved?
+
+```csharp
+public sealed class Fellowship
+{
+    private readonly HashSet<Character> _members = [];
+
+    public Fellowship AddMember(Character character)
+    {
+        if (!_members.Add(character))
+        {
+            // Should it be really considered as Exceptional situations?
+            // Or like a business error?
+            throw new InvalidOperationException(
+                "A character with the same name already exists in the fellowship.");
+        }
+
+        return this;
+    }
+
+    public Fellowship Remove(Name name)
+    {
+        var characterToRemove = _members.FirstOrDefault(character => character.HasName(name));
+        if (characterToRemove == null)
+        {
+            throw new InvalidOperationException($"No character with the name '{name}' exists in the fellowship.");
+        }
+        _members.Remove(characterToRemove);
+
+        return this;
+    }
+
+    public override string ToString()
+        => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + (member + "\n"));
+
+    public Fellowship MoveTo(Region destination, params Name[] names)
+    {
+        _members
+            .Where(character => ContainsCharacter(names, character))
+            .ToList()
+            .ForEach(character => character.Move(destination));
+
+        return this;
+    }
+
+    private static bool ContainsCharacter(Name[] names, Character character)
+        => names.ToList().Exists(character.HasName);
+
+    public void PrintMembersInRegion(Region region)
+    {
+        var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
+
+        if (charactersInRegion.Count == 0)
+        {
+            // Hidden dependencies on Console
+            // What if we would like to write into something else?
+            // Not really extensible...
+            Console.WriteLine($"No members in {region}");
+            return;
+        }
+
+        Console.WriteLine($"Members in {region}:");
+
+        charactersInRegion
+            .ToList()
+            .ForEach(character => Console.WriteLine(character.ToStringWithoutRegion()));
+    }
+}
+```
+
+### No more hidden dependencies
+We will remove the `Console` dependencies by injecting how to log into the `Collection`.
+
+🔴 Let's add a new test / a new expectation
+
+```csharp
+[Fact]
+public Task Print_Fellowship_Members_By_Region_Without_Console()
+{
+    var log = new StringWriter();
+    var fellowshipWithoutConsole = new Fellowship();
+    
+    var updatedFellowship = fellowshipWithoutConsole
+        .AddMember(_frodo)
+        .AddMember(_gandalf)
+        .AddMember(_gimli);
+
+    updatedFellowship.PrintMembersInRegion(Region.Mordor, s => log.WriteLine(s));
+    updatedFellowship.PrintMembersInRegion(Region.Shire, s => log.WriteLine(s));
+    updatedFellowship.PrintMembersInRegion(Region.Lothlorien, s => log.WriteLine(s));
+
+    return Verify(log.ToString());
+}
+```
+
+🟢We use the logger in addition to the `Console` (for now)
+
+```csharp
+public void PrintMembersInRegion(Region region, Action<string> logger)
+{
+    var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
+
+    if (charactersInRegion.Count == 0)
+    {
+        logger.Invoke($"No members in {region}");
+        Console.WriteLine($"No members in {region}");
+        return;
+    }
+
+    logger.Invoke($"Members in {region}:");
+    Console.WriteLine($"Members in {region}:");
+
+    charactersInRegion
+        .ToList()
+        .ForEach(character =>
+        {
+            logger.Invoke(character.ToStringWithoutRegion());
+            Console.WriteLine(character.ToStringWithoutRegion());
+        });
+}
+```
+
+🔵 Any improvement?
+
+We can simulate logging to remove nullable logger field and use an alias for `Logger`:
+
+```csharp
+using Logger = Action<string>;
+    
+public sealed class Fellowship
+{
+    public void PrintMembersInRegion(Region region)
+    {
+        var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
+
+        if (charactersInRegion.Count == 0)
+        {
+            _logger($"No members in {region}");
+            Console.WriteLine($"No members in {region}");
+            return;
+        }
+
+        _logger($"Members in {region}:");
+        Console.WriteLine($"Members in {region}:");
+
+        charactersInRegion
+            .ToList()
+            .ForEach(character =>
+            {
+                _logger(character.ToStringWithoutRegion());
+                Console.WriteLine(character.ToStringWithoutRegion());
+            });
+    }
+```
+
+Then we use the `Logger` in the entire system through constructor injection in the `Service` and `method` injection in the `Character` entity.
+
+```csharp
+public class FellowshipOfTheRingService(Logger logger)
+{
+    ...
+        
+    public void MoveMembersToRegion(List<string> memberNames, string region)
+        => _fellowship.MoveTo(
+            region.ToRegion(),
+            logger,
+            memberNames.Select(m => m.ToName()).ToArray()
+        );
+
+    public void PrintMembersInRegion(string region) =>
+        _fellowship.PrintMembersInRegion(region.ToRegion(), logger);
+    
+    ...
+}
+
+public sealed class Fellowship()
+{
+    ...
+    public Fellowship MoveTo(Region destination, Logger logger, params Name[] names)
+    {
+        _members
+            .Where(character => ContainsCharacter(names, character))
+            .ToList()
+            .ForEach(character => character.Move(destination, logger));
+
+        return this;
+    }
+
+    ...
+        
+    public void PrintMembersInRegion(Region region, Logger logger)
+    {
+        var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
+
+        if (charactersInRegion.Count == 0)
+        {
+            logger($"No members in {region}");
+            return;
+        }
+
+        logger($"Members in {region}:");
+
+        charactersInRegion
+            .ToList()
+            .ForEach(character => logger(character.ToStringWithoutRegion()));
+    }
+}
+
+public sealed class Character(Name name, Race race, Weapon weapon, Region currentLocation = Region.Shire)
+{
+    public void Move(Region destination, Logger logger)
+    {
+        ...
+    }
+    ...
+}
+```
+

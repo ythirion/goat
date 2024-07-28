@@ -1,3 +1,3 @@
 ﻿using LordOfTheRings.App;
 
-App.Run();
+App.Run(Console.WriteLine);
