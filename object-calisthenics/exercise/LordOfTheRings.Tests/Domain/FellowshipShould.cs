@@ -1,4 +1,5 @@
 using FluentAssertions;
+using FluentAssertions.LanguageExt;
 using LordOfTheRings.Domain;
 
 namespace LordOfTheRings.Tests.Domain
@@ -36,27 +37,28 @@ namespace LordOfTheRings.Tests.Domain
         public void Add_New_Member()
             => _fellowship
                 .AddMember(_frodo)
+                .RightUnsafe()
                 .ToString()
                 .Should()
                 .Be("Fellowship of the Ring Members:\nFrodo (Hobbit) with Sting in Shire\n");
 
         [Fact]
         public void Add_Existing_Member_Fails()
-        {
-            var addFrodoTwice = () => _fellowship
+            => _fellowship
                 .AddMember(_frodo)
-                .AddMember(_frodo);
-
-            addFrodoTwice.Should()
-                .Throw<InvalidOperationException>()
-                .WithMessage("A character with the same name already exists in the fellowship.");
-        }
+                .Bind(f => f.AddMember(_frodo))
+                .Should()
+                .BeLeft(err => err.Message
+                    .Should()
+                    .Be("A character with the same name already exists in the fellowship.")
+                );
 
         [Fact]
         public void Remove_Existing_Member()
             => _fellowship
                 .AddMember(_frodo)
-                .Remove(FrodoName.ToName())
+                .Bind(f => f.Remove(FrodoName.ToName().RightUnsafe()))
+                .RightUnsafe()
                 .ToString()
                 .Should()
                 .Be("Fellowship of the Ring Members:\n");
@@ -65,8 +67,10 @@ namespace LordOfTheRings.Tests.Domain
         public void Move_Members_To_Existing_Region()
             => _fellowship
                 .AddMember(_frodo)
-                .AddMember(_gandalf)
-                .MoveTo(Region.Moria, _emptyLogger, FrodoName.ToName(), GandalfName.ToName())
+                .Bind(f => f.AddMember(_gandalf))
+                .Bind(f => f.MoveTo(Region.Moria, _emptyLogger, FrodoName.ToName().RightUnsafe(),
+                    GandalfName.ToName().RightUnsafe()))
+                .RightUnsafe()
                 .ToString()
                 .Should()
                 .BeEquivalentTo(
@@ -74,32 +78,27 @@ namespace LordOfTheRings.Tests.Domain
 
         [Fact]
         public void Move_Members_From_Mordor_To_Another_Region_Fails()
-        {
-            var moveGimliFromMordor = () => _fellowship
+            => _fellowship
                 .AddMember(_gimli)
-                .MoveTo(Region.Lothlorien, _emptyLogger, GimliName.ToName());
-
-            moveGimliFromMordor
+                .Bind(f => f.MoveTo(Region.Lothlorien, _emptyLogger, GimliName.ToName().RightUnsafe()))
                 .Should()
-                .Throw<InvalidOperationException>()
-                .WithMessage(
-                    $"Cannot move Gimli from Mordor to Lothlorien. Reason: There is no coming back from Mordor.");
-        }
+                .BeLeft(error => error.Message.Should().Be(
+                    $"Cannot move Gimli from Mordor to Lothlorien. Reason: There is no coming back from Mordor."
+                ));
 
         [Fact]
-        public Task Print_Fellowship_Members_By_Region_Without_Console()
+        public Task Print_Fellowship_Members_By_Region()
         {
             var log = new StringWriter();
             Action<string> logger = s => log.WriteLine(s);
 
-            var updatedFellowship = _fellowship
+            _fellowship
                 .AddMember(_frodo)
-                .AddMember(_gandalf)
-                .AddMember(_gimli);
-
-            updatedFellowship.PrintMembersInRegion(Region.Mordor, logger);
-            updatedFellowship.PrintMembersInRegion(Region.Shire, logger);
-            updatedFellowship.PrintMembersInRegion(Region.Lothlorien, logger);
+                .Bind(f => f.AddMember(_gandalf))
+                .Bind(f => f.AddMember(_gimli))
+                .Do(f => f.PrintMembersInRegion(Region.Mordor, logger))
+                .Do(f => f.PrintMembersInRegion(Region.Shire, logger))
+                .Do(f => f.PrintMembersInRegion(Region.Lothlorien, logger));
 
             return Verify(log.ToString());
         }

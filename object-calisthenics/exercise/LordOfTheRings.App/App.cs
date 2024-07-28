@@ -8,24 +8,17 @@ namespace LordOfTheRings.App
         {
             var fellowship = new FellowshipOfTheRingService(logger);
 
-            try
-            {
-                AddMember(fellowship, "Frodo", Race.Hobbit, "Sting", 30);
-                AddMember(fellowship, "Sam", Race.Hobbit, "Dagger", 10);
-                AddMember(fellowship, "Merry", Race.Hobbit, "Short Sword", 24);
-                AddMember(fellowship, "Pippin", Race.Hobbit, "Bow", 8);
-                AddMember(fellowship, "Aragorn", Race.Human, "Anduril", 100);
-                AddMember(fellowship, "Boromir", Race.Human, "Sword", 90);
-                AddMember(fellowship, "Legolas", Race.Elf, "Bow", 100);
-                AddMember(fellowship, "Gimli", Race.Dwarf, "Axe", 100);
-                AddMember(fellowship, "Gandalf the 🐐", Race.Wizard, "Staff", 200);
+            AddMember(fellowship, "Frodo", Race.Hobbit, "Sting", 30);
+            AddMember(fellowship, "Sam", Race.Hobbit, "Dagger", 10);
+            AddMember(fellowship, "Merry", Race.Hobbit, "Short Sword", 24);
+            AddMember(fellowship, "Pippin", Race.Hobbit, "Bow", 8);
+            AddMember(fellowship, "Aragorn", Race.Human, "Anduril", 100);
+            AddMember(fellowship, "Boromir", Race.Human, "Sword", 90);
+            AddMember(fellowship, "Legolas", Race.Elf, "Bow", 100);
+            AddMember(fellowship, "Gimli", Race.Dwarf, "Axe", 100);
+            AddMember(fellowship, "Gandalf the 🐐", Race.Wizard, "Staff", 200);
 
-                logger(fellowship.ToString());
-            }
-            catch (Exception ex)
-            {
-                logger(ex.Message);
-            }
+            logger(fellowship.ToString());
 
             var group1 = new List<string> {"Frodo", "Sam"};
             var group2 = new List<string> {"Merry", "Pippin", "Aragorn", "Boromir"};
@@ -35,16 +28,9 @@ namespace LordOfTheRings.App
             fellowship.MoveMembersToRegion(group2, "Moria");
             fellowship.MoveMembersToRegion(group3, "Lothlorien");
 
-            try
-            {
-                var group4 = new List<string> {"Frodo", "Sam"};
-                fellowship.MoveMembersToRegion(group4, "Mordor");
-                fellowship.MoveMembersToRegion(group4, "Shire"); // This should fail for "Frodo"
-            }
-            catch (Exception ex)
-            {
-                logger(ex.Message);
-            }
+            var group4 = new List<string> {"Frodo", "Sam"};
+            fellowship.MoveMembersToRegion(group4, "Mordor");
+            fellowship.MoveMembersToRegion(group4, "Shire");
 
             fellowship.PrintMembersInRegion("Rivendell");
             fellowship.PrintMembersInRegion("Moria");
@@ -52,15 +38,8 @@ namespace LordOfTheRings.App
             fellowship.PrintMembersInRegion("Mordor");
             fellowship.PrintMembersInRegion("Shire");
 
-            try
-            {
-                fellowship.RemoveMember("Frodo");
-                fellowship.RemoveMember("Sam"); // This should throw an exception
-            }
-            catch (Exception ex)
-            {
-                logger(ex.Message);
-            }
+            fellowship.RemoveMember("Frodo");
+            fellowship.RemoveMember("Sam"); // This should fail
         }
 
         private static void AddMember(
@@ -69,6 +48,13 @@ namespace LordOfTheRings.App
             Race race,
             string weapon,
             int damage)
-            => service.AddMember(new Character(name.ToName(), race, new Weapon(weapon.ToName(), damage.ToDamage())));
+        {
+            var character = from n in name.ToName()
+                from w in weapon.ToName()
+                from d in damage.ToDamage()
+                select new Character(n, race, new Weapon(w, d));
+
+            character.IfRight(c => service.AddMember(c));
+        }
     }
 }

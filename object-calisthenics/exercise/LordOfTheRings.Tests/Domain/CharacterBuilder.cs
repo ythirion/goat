@@ -24,9 +24,12 @@ namespace LordOfTheRings.Tests.Domain
         }
 
         public Character Build() => new(
-            _name.ToName(),
+            _name.ToName().RightUnsafe(),
             _race ?? Race.Hobbit,
-            new Weapon((_weapon ?? "Sting").ToName(), Faker.RandomNumber.Next(0, 200).ToDamage()),
+            new Weapon(
+                (_weapon ?? "Sting").ToName().RightUnsafe(),
+                Faker.RandomNumber.Next(0, 200).ToDamage().RightUnsafe()
+            ),
             _region ?? Region.Shire
         );
     }

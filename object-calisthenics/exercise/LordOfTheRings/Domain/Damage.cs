@@ -1,3 +1,6 @@
+using LanguageExt;
+using LanguageExt.Common;
+
 namespace LordOfTheRings.Domain
 {
     public sealed class Damage : IEquatable<Damage>
@@ -5,11 +8,10 @@ namespace LordOfTheRings.Domain
         private readonly int _value;
         private Damage(int value) => _value = value;
 
-        public static Damage Parse(int value)
-        {
-            if (value < 0) throw new ArgumentException("A damage can not be negative");
-            return new Damage(value);
-        }
+        public static Either<Error, Damage> Parse(int value)
+            => value < 0
+                ? Error.New("A damage can not be negative")
+                : new Damage(value);
 
         public override string ToString() => _value.ToString();
 
@@ -29,6 +31,6 @@ namespace LordOfTheRings.Domain
 
     public static class DamageExtensions
     {
-        public static Damage ToDamage(this int value) => Damage.Parse(value);
+        public static Either<Error, Damage> ToDamage(this int value) => Damage.Parse(value);
     }
 }

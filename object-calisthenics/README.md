@@ -1262,3 +1262,162 @@ public sealed class Character(Name name, Race race, Weapon weapon, Region curren
 }
 ```
 
+### No more `Exceptions`
+We will use monads to remove exceptions and make our code more explicit.
+More explanations about it [here](https://xtrem-tdd.netlify.app/Flavours/Design/avoid-exceptions).
+
+We make it explicit that failure can arise on each method by returning: `Either<Error, Fellowship>` from [LanguageExt](https://github.com/louthy/language-ext).
+
+🔴 We start by adapting a first test
+
+```csharp
+[Fact]
+public void Add_Existing_Member_Fails()
+    => _fellowship
+        .AddMemberWithMonad(_frodo)
+        .Bind(f => f.AddMemberWithMonad(_frodo))
+        .Should()
+        .BeLeft(err => err.Message
+            .Should()
+            .Be("A character with the same name already exists in the fellowship.")
+        );
+```
+
+🟢 We make it pass
+
+```csharp
+public Either<Error, Fellowship> AddMemberWithMonad(Character character)
+    => !_members.Add(character)
+        ? Error.New("A character with the same name already exists in the fellowship.")
+        : this;
+```
+
+We continue by plugging the `AddMember` callers to this new method.
+
+After a few iterations our `Fellowship` class looks like this:
+
+```csharp
+using LanguageExt;
+using LanguageExt.Common;
+
+namespace LordOfTheRings.Domain
+{
+    public sealed class Fellowship()
+    {
+        private readonly System.Collections.Generic.HashSet<Character> _members = [];
+
+        public Either<Error, Fellowship> AddMember(Character character)
+            => !_members.Add(character)
+                ? Error.New("A character with the same name already exists in the fellowship.")
+                : this;
+
+        public Either<Error, Fellowship> Remove(Name name)
+        {
+            var characterToRemove = _members.FirstOrDefault(character => character.HasName(name));
+
+            if (characterToRemove == null)
+                return Error.New($"No character with the name '{name}' exists in the fellowship.");
+
+            _members.Remove(characterToRemove);
+            return this;
+        }
+
+        public override string ToString()
+            => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + (member + "\n"));
+
+        public Either<Error, Fellowship> MoveTo(Region destination, Logger logger, params Name[] names)
+        {
+            var membersToMove = _members.Where(character => ContainsCharacter(names, character));
+            var results = membersToMove.Select(character => character.Move(destination, logger));
+            var errors = results.Where(r => r.IsLeft).ToList();
+
+            return errors.Count != 0
+                ? errors.First().Map(_ => this)
+                : this;
+        }
+
+        private static bool ContainsCharacter(Name[] names, Character character)
+            => names.ToList().Exists(character.HasName);
+
+        public void PrintMembersInRegion(Region region, Logger logger)
+        {
+            var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
+
+            if (charactersInRegion.Count == 0)
+            {
+                logger($"No members in {region}");
+                return;
+            }
+
+            logger($"Members in {region}:");
+
+            charactersInRegion
+                .ToList()
+                .ForEach(character => logger(character.ToStringWithoutRegion()));
+        }
+    }
+}
+```
+
+At the `Service` level, we don't want to leak elements from our `Domain` and returns `Unit` in case of `Right`:
+
+```csharp
+public class FellowshipOfTheRingService(Logger logger)
+{
+    private readonly Fellowship _fellowship = new();
+
+    public Either<Error, Unit> AddMember(Character character)
+        => _fellowship.AddMember(character).Map(_ => Unit.Default);
+
+    public Either<Error, Unit> RemoveMember(string name)
+        => name.ToName()
+            .Bind(n => _fellowship.Remove(n))
+            .Match(_ => { }, err => logger(err.Message));
+
+    public Either<Error, Unit> MoveMembersToRegion(List<string> memberNames, string region)
+        => _fellowship.MoveTo(
+            region.ToRegion(),
+            logger,
+            memberNames.Select(m => m.ToName()).Rights().ToArray()
+        ).Match(_ => { }, err => logger(err.Message));
+
+    public void PrintMembersInRegion(string region) =>
+        _fellowship.PrintMembersInRegion(region.ToRegion(), logger);
+
+    public override string ToString() => _fellowship.ToString();
+}
+```
+
+We have no more `Exceptions` here, but we have still some of them in our wrap types like `Damage` or `Name`.
+Let's represent the `parsing` result in the same way.
+
+```csharp
+public sealed class Damage : IEquatable<Damage>
+{
+    private readonly int _value;
+    private Damage(int value) => _value = value;
+
+    public static Either<Error, Damage> Parse(int value)
+        => value < 0
+            ? Error.New("A damage can not be negative")
+            : new Damage(value);
+    ...
+}
+
+public sealed class Name : IEquatable<Name>
+{
+    private readonly string _value;
+    private Name(string value) => _value = value;
+
+    public static Either<Error, Name> Parse(string value)
+        => string.IsNullOrWhiteSpace(value)
+            ? Error.New("A name can not be empty.")
+            : new Name(value);
+    ...
+}
+```
+
+Here is ending our journey.
+
+> What did you think about it?
+> What would you do differently?

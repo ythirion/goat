@@ -1,12 +1,15 @@
+using LanguageExt;
+using LanguageExt.Common;
+
 namespace LordOfTheRings.Domain
 {
     public sealed class Character(Name name, Race race, Weapon weapon, Region currentLocation = Region.Shire)
     {
-        public void Move(Region destination, Logger logger)
+        public Either<Error, Character> Move(Region destination, Logger logger)
         {
             if (currentLocation == Region.Mordor && destination != Region.Mordor)
             {
-                throw new InvalidOperationException(
+                return Error.New(
                     $"Cannot move {name} from Mordor to {destination}. Reason: There is no coming back from Mordor.");
             }
 
@@ -14,6 +17,8 @@ namespace LordOfTheRings.Domain
             logger(destination != Region.Mordor
                 ? $"{name} moved to {destination}."
                 : $"{name} moved to {destination} 💀.");
+
+            return this;
         }
 
         public bool HasName(Name other) => name == other;

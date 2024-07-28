@@ -9,27 +9,14 @@ namespace LordOfTheRings.Tests.Domain
         public void Parse_Positive_Int()
             => Prop.ForAll(
                     Arb.Default.PositiveInt(),
-                    validDamage => Damage.Parse(validDamage.Get) == validDamage.Get)
+                    validDamage => Damage.Parse(validDamage.Get).IsRight)
                 .QuickCheckThrowOnFailure();
 
         [Fact]
         public void Not_Parse_Negative_Int()
             => Prop.ForAll(
                     Arb.Default.NegativeInt(),
-                    invalidDamage => IsParsingFailFor(invalidDamage.Get))
+                    invalidDamage => Damage.Parse(invalidDamage.Get).IsLeft)
                 .QuickCheckThrowOnFailure();
-
-        private static bool IsParsingFailFor(int invalidDamage)
-        {
-            try
-            {
-                Damage.Parse(invalidDamage);
-                return false;
-            }
-            catch (ArgumentException)
-            {
-                return true;
-            }
-        }
     }
 }

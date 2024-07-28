@@ -1,44 +1,43 @@
+using LanguageExt;
+using LanguageExt.Common;
+using Characters = System.Collections.Generic.HashSet<LordOfTheRings.Domain.Character>;
+
 namespace LordOfTheRings.Domain
 {
     public sealed class Fellowship()
     {
-        private readonly HashSet<Character> _members = [];
+        private readonly Characters _members = [];
 
-        public Fellowship AddMember(Character character)
-        {
-            if (!_members.Add(character))
-            {
-                throw new InvalidOperationException(
-                    "A character with the same name already exists in the fellowship.");
-            }
+        public Either<Error, Fellowship> AddMember(Character character)
+            => !_members.Add(character)
+                ? Error.New("A character with the same name already exists in the fellowship.")
+                : this;
 
-            return this;
-        }
-
-        public Fellowship Remove(Name name)
+        public Either<Error, Fellowship> Remove(Name name)
         {
             var characterToRemove = _members.FirstOrDefault(character => character.HasName(name));
+
             if (characterToRemove == null)
-            {
-                throw new InvalidOperationException($"No character with the name '{name}' exists in the fellowship.");
-            }
+                return Error.New($"No character with the name '{name}' exists in the fellowship.");
 
             _members.Remove(characterToRemove);
-
             return this;
         }
 
         public override string ToString()
             => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + (member + "\n"));
 
-        public Fellowship MoveTo(Region destination, Logger logger, params Name[] names)
+        public Either<Error, Fellowship> MoveTo(Region destination, Logger logger, params Name[] names)
         {
-            _members
+            var errors = _members
                 .Where(character => ContainsCharacter(names, character))
-                .ToList()
-                .ForEach(character => character.Move(destination, logger));
+                .Select(character => character.Move(destination, logger))
+                .Lefts()
+                .ToList();
 
-            return this;
+            return errors.Count != 0
+                ? errors[0]
+                : this;
         }
 
         private static bool ContainsCharacter(Name[] names, Character character)
