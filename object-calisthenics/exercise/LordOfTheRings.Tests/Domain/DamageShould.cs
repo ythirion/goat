@@ -26,7 +26,7 @@ namespace LordOfTheRings.Tests.Domain
                 Damage.Parse(invalidDamage);
                 return false;
             }
-            catch (ArgumentException _)
+            catch (ArgumentException)
             {
                 return true;
             }

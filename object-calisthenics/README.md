@@ -558,3 +558,354 @@ public void RemoveMember(string name)
 public void MoveMembersToRegion(List<string> memberNames, string region)
 public void PrintMembersInRegion(string region)
 ```
+
+## First Class Collections
+We may create a `First class collection` to manage fellowship members and encapsulate the business behavior leaked in the `FellowshipOfTheRingService`:
+
+```csharp
+private readonly List<Character> _members = [];
+
+public void AddMember(Character character)
+{
+    // Those kind of behaviors should be encapsultaed in the Domain...
+    var exists = false;
+    foreach (var member in _members)
+    {
+        if (member.Name == character.Name)
+        {
+            exists = true;
+            break;
+        }
+    }
+
+    if (exists)
+    {
+        throw new InvalidOperationException(
+            "A character with the same name already exists in the fellowship.");
+    }
+
+    _members.Add(character);
+}
+```
+
+As in the previous step, we use the `Sprout Technique` to design our new `Collection` that will contain the contract below:
+
+🔴 We start with a test on `AddMember`
+
+```csharp
+[Fact]
+public void Add_New_Member()
+    => _fellowship
+        .AddMember(_frodo)
+        .ToString()
+        .Should()
+        .Be("Fellowship of the Ring Members:\nFrodo (Hobbit) with Sting in Shire\n");
+```
+
+We design a [`Test Data Builder`](https://xtrem-tdd.netlify.app/Flavours/Testing/test-data-builders) to instantiate `Character` and create a single way of creating those from our tests.
+If its design changes (it will at one point: `No Getters/Setters/Properties`), it makes easy to adapt our tests.
+
+```csharp
+public class CharacterBuilder
+{
+    private readonly string _name;
+    private Race? _race;
+    private string? _weapon;
+    private CharacterBuilder(string name) => _name = name;
+
+    public static CharacterBuilder ACharacter(string name) => new(name);
+    public CharacterBuilder Hobbit() => Act(() => _race = Race.Hobbit);
+    public CharacterBuilder With(string weapon) => Act(() => _weapon = weapon);
+
+    private CharacterBuilder Act(Action action)
+    {
+        action();
+        return this;
+    }
+
+    public Character Build() => new()
+    {
+        Name = _name.ToName(), Race = _race ?? Race.Hobbit,
+        Weapon = new Weapon
+        {
+            Name = (_weapon ?? "String").ToName(),
+            // Use Faker.Net for the data which are not impacting the output of our tests
+            Damage = Faker.RandomNumber.Next(0, 200).ToDamage()
+        }
+    };
+}
+```
+
+Our test is still red and looks like this:
+
+```csharp
+namespace LordOfTheRings.Tests.Domain
+{
+    public class FellowshipShould
+    {
+        private readonly Character _frodo = CharacterBuilder
+            .ACharacter("Frodo")
+            .Hobbit()
+            .Build();
+
+        private readonly Fellowship _fellowship = new();
+
+        [Fact]
+        public void Add_New_Member()
+            => _fellowship
+                .AddMember(_frodo)
+                .ToString()
+                .Should()
+                .Be("Fellowship of the Ring Members:\nFrodo (Hobbit) with Sting in Shire\n");
+    }
+
+    internal class Fellowship
+    {
+        // We choose to return Fellowship to chain calls 
+        public Fellowship AddMember(Character character)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+```
+
+🟢 We make it pass by implementing the `ToString` method and using a `HashSet` to manage the members 
+
+```csharp
+internal class Fellowship
+{
+    private readonly HashSet<Character> _members = [];
+
+    public Fellowship AddMember(Character character)
+    {
+        _members.Add(character);
+        return this;
+    }
+
+    public override string ToString()
+        => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + (member + "\n"));
+}
+
+public sealed class Character
+{
+    ...
+    public override string ToString() => $"{Name} ({Race}) with {Weapon} in {CurrentLocation}";
+}
+```
+
+Not that much to refactor here.
+
+🔴 Let's add a second test that will represent its behavior when trying to add an existing member
+
+```csharp
+[Fact]
+public void Add_Existing_Member_Fails()
+{
+    var addFrodoTwice = () => _fellowship
+        .AddMember(_frodo)
+        .AddMember(_frodo);
+    
+    addFrodoTwice.Should()
+        .Throw<InvalidOperationException>()
+        .WithMessage("A character with the same name already exists in the fellowship.");
+}
+```
+
+🟢 We use the feature offered by `HashSet` to do so:
+
+```csharp
+public Fellowship AddMember(Character character)
+{
+    if (!_members.Add(character))
+    {
+        throw new InvalidOperationException(
+            "A character with the same name already exists in the fellowship.");
+    }
+    return this;
+}
+```
+
+### After a few iterations
+Our tests are looking like this:
+
+```csharp
+public class FellowshipShould
+{
+    private readonly Character _frodo = CharacterBuilder
+        .ACharacter("Frodo")
+        .Hobbit()
+        .Build();
+
+    private readonly Character _gandalf =
+        CharacterBuilder
+            .ACharacter("Gandalf the 🐐")
+            .With("Staff")
+            .Wizard()
+            .Build();
+
+    private readonly Character _gimli =
+        CharacterBuilder
+            .ACharacter("Gimli")
+            .With("Axe")
+            .Dwarf()
+            .In(Region.Mordor)
+            .Build();
+
+    private readonly Fellowship _fellowship = new();
+
+    [Fact]
+    public void Add_New_Member()
+        => _fellowship
+            .AddMember(_frodo)
+            .ToString()
+            .Should()
+            .Be("Fellowship of the Ring Members:\nFrodo (Hobbit) with Sting in Shire\n");
+
+    [Fact]
+    public void Add_Existing_Member_Fails()
+    {
+        var addFrodoTwice = () => _fellowship
+            .AddMember(_frodo)
+            .AddMember(_frodo);
+
+        addFrodoTwice.Should()
+            .Throw<InvalidOperationException>()
+            .WithMessage("A character with the same name already exists in the fellowship.");
+    }
+
+    [Fact]
+    public void Remove_Existing_Member()
+        => _fellowship
+            .AddMember(_frodo)
+            .Remove(_frodo.Name)
+            .ToString()
+            .Should()
+            .Be("Fellowship of the Ring Members:\n");
+
+    [Fact]
+    public void Move_Members_To_Existing_Region()
+        => _fellowship
+            .AddMember(_frodo)
+            .AddMember(_gandalf)
+            .MoveTo(Region.Moria, _frodo.Name, _gandalf.Name)
+            .ToString()
+            .Should()
+            .BeEquivalentTo(
+                "Fellowship of the Ring Members:\nFrodo (Hobbit) with Sting in Moria\nGandalf the \ud83d\udc10 (Wizard) with Staff in Moria\n");
+
+    [Fact]
+    public void Move_Members_From_Mordor_To_Another_Region_Fails()
+    {
+        var moveGimliFromMordor = () => _fellowship
+            .AddMember(_gimli)
+            .MoveTo(Region.Lothlorien, _gimli.Name);
+
+        moveGimliFromMordor
+            .Should()
+            .Throw<InvalidOperationException>()
+            .WithMessage(
+                $"Cannot move Gimli from Mordor to Lothlorien. Reason: There is no coming back from Mordor.");
+    }
+
+
+    [Fact]
+    public Task Print_Fellowship_Members_By_Region()
+    {
+        var updatedFellowship = _fellowship
+            .AddMember(_frodo)
+            .AddMember(_gandalf)
+            .AddMember(_gimli);
+
+        var originalConsoleOut = Console.Out;
+        var log = new StringWriter();
+        Console.SetOut(log);
+
+        updatedFellowship.PrintMembersInRegion(Region.Mordor);
+        updatedFellowship.PrintMembersInRegion(Region.Shire);
+        updatedFellowship.PrintMembersInRegion(Region.Lothlorien);
+
+        Console.SetOut(originalConsoleOut);
+
+        return Verify(log.ToString());
+    }
+}
+```
+
+And the associated production code:
+
+```csharp
+public sealed class Fellowship
+{
+    private readonly HashSet<Character> _members = [];
+
+    public Fellowship AddMember(Character character)
+    {
+        if (!_members.Add(character))
+        {
+            throw new InvalidOperationException(
+                "A character with the same name already exists in the fellowship.");
+        }
+
+        return this;
+    }
+
+    public Fellowship Remove(Name name)
+    {
+        var characterToRemove = _members.FirstOrDefault(character => character.Name == name);
+        if (characterToRemove == null)
+        {
+            throw new InvalidOperationException($"No character with the name '{name}' exists in the fellowship.");
+        }
+
+        _members.Remove(characterToRemove);
+
+        return this;
+    }
+
+    public override string ToString()
+        => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + (member + "\n"));
+
+    public Fellowship MoveTo(Region destination, params Name[] names)
+    {
+        _members.Where(m => names.Contains(m.Name))
+            .ToList()
+            .ForEach(character => MoveCharacter(character, destination));
+
+        return this;
+    }
+
+    private static void MoveCharacter(Character character, Region destination)
+    {
+        if (character.CurrentLocation == Region.Mordor && destination != Region.Mordor)
+        {
+            throw new InvalidOperationException(
+                $"Cannot move {character.Name} from Mordor to {destination}. Reason: There is no coming back from Mordor.");
+        }
+
+        character.CurrentLocation = destination;
+        Console.WriteLine(destination != Region.Mordor
+            ? $"{character.Name} moved to {destination}."
+            : $"{character.Name} moved to {destination} 💀.");
+    }
+
+    public void PrintMembersInRegion(Region region)
+    {
+        var charactersInRegion = _members.Where(m => m.CurrentLocation == region).ToList();
+
+        if (charactersInRegion.Count == 0)
+        {
+            Console.WriteLine($"No members in {region}");
+            return;
+        }
+
+        Console.WriteLine($"Members in {region}:");
+        foreach (var character in charactersInRegion)
+        {
+            Console.WriteLine(character);
+        }
+    }
+}
+```
+
+### Integrate the First Class collection
