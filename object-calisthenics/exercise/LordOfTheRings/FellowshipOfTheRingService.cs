@@ -20,7 +20,7 @@ namespace LordOfTheRings
             => _fellowship.MoveTo(
                 region.ToRegion(),
                 logger,
-                memberNames.Select(m => m.ToName()).Rights().ToArray()
+                memberNames.Map(m => m.ToName()).Rights().ToArray()
             ).Match(_ => { }, err => logger(err.Message));
 
         public void PrintMembersInRegion(string region) =>

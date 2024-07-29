@@ -1,39 +1,37 @@
 using LanguageExt;
 using LanguageExt.Common;
-using Characters = System.Collections.Generic.HashSet<LordOfTheRings.Domain.Character>;
+using Characters = LanguageExt.Seq<LordOfTheRings.Domain.Character>;
 
 namespace LordOfTheRings.Domain
 {
-    public sealed class Fellowship()
+    public sealed class Fellowship
     {
-        private readonly Characters _members = [];
+        private Characters _members = [];
 
         public Either<Error, Fellowship> AddMember(Character character)
-            => !_members.Add(character)
-                ? Error.New("A character with the same name already exists in the fellowship.")
-                : this;
+            => _members.Find(c => c == character)
+                .Map(_ => Error.New("A character with the same name already exists in the fellowship."))
+                .ToEither(this)
+                .Swap()
+                .Do(_ => _members = _members.Add(character));
 
         public Either<Error, Fellowship> Remove(Name name)
-        {
-            var characterToRemove = _members.FirstOrDefault(character => character.HasName(name));
-
-            if (characterToRemove == null)
-                return Error.New($"No character with the name '{name}' exists in the fellowship.");
-
-            _members.Remove(characterToRemove);
-            return this;
-        }
+            => _members.Find(character => character.HasName(name))
+                .ToEither(Error.New($"No character with the name '{name}' exists in the fellowship."))
+                .Do(characterToRemove => _members = _members.Filter(c => c != characterToRemove))
+                .Map(_ => this);
 
         public override string ToString()
-            => _members.Aggregate("Fellowship of the Ring Members:\n", (current, member) => current + (member + "\n"));
+            => _members.Fold("Fellowship of the Ring Members:\n",
+                (current, member) => current + (member + "\n")
+            );
 
         public Either<Error, Fellowship> MoveTo(Region destination, Logger logger, params Name[] names)
         {
             var errors = _members
-                .Where(character => ContainsCharacter(names, character))
-                .Select(character => character.Move(destination, logger))
-                .Lefts()
-                .ToList();
+                .Filter(character => ContainsCharacter(names, character))
+                .Map(character => character.Move(destination, logger))
+                .Lefts();
 
             return errors.Count != 0
                 ? errors[0]
@@ -41,12 +39,11 @@ namespace LordOfTheRings.Domain
         }
 
         private static bool ContainsCharacter(Name[] names, Character character)
-            => names.ToList().Exists(character.HasName);
+            => names.Exists(character.HasName);
 
         public void PrintMembersInRegion(Region region, Logger logger)
         {
-            var charactersInRegion = _members.Where(m => m.IsIn(region)).ToList();
-
+            var charactersInRegion = _members.Filter(m => m.IsIn(region));
             if (charactersInRegion.Count == 0)
             {
                 logger($"No members in {region}");
