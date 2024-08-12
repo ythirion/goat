@@ -1476,6 +1476,99 @@ public sealed class Fellowship
 }
 ```
 
+### Make the Domain Immutable
+We can easily make our `Domain` model immutable because we already returned `Fellowship` in all our behaviors.
+We change our internal code (without impacting the external callers) and instantiate new objects at each `mutation`:
+
+```csharp
+public sealed class Fellowship
+{
+    // readonly to ensure immutability
+    private readonly Characters _members;
+
+    public Fellowship() => _members = [];
+    private Fellowship(Characters members) => _members = members;
+    private Fellowship(Characters allMembers, Characters updated) => _members = allMembers + updated;
+
+    public Either<Error, Fellowship> AddMember(Character character)
+        => _members.Find(c => c == character)
+            .Map(_ => Error.New("A character with the same name already exists in the fellowship."))
+            .ToEither(defaultLeftValue: new Fellowship(_members.Add(character)))
+            .Swap();
+
+    public Either<Error, Fellowship> Remove(Name name)
+        => _members.Find(character => character.HasName(name))
+            .ToEither(defaultLeftValue: Error.New($"No character with the name '{name}' exists in the fellowship."))
+            .Map(characterToRemove => new Fellowship(_members.Filter(c => c != characterToRemove)));
+
+    public override string ToString()
+        => _members.Fold("Fellowship of the Ring Members:\n",
+            (current, member) => current + (member + "\n")
+        );
+
+    public Either<Error, Fellowship> MoveTo(Region destination, Logger logger, params Name[] names)
+    {
+        var membersToUpdate = _members.Filter(character => ContainsCharacter(names, character));
+        var results = membersToUpdate.Map(character => character.Move(destination, logger));
+        var errors = results.Lefts();
+
+        return errors.Count != 0
+            ? errors[0]
+            : new Fellowship(_members.Filter(c => !membersToUpdate.Contains(c)), results.Rights());
+    }
+
+    private static bool ContainsCharacter(Name[] names, Character character)
+        => names.Exists(character.HasName);
+
+    public void PrintMembersInRegion(Region region, Logger logger)
+    {
+        var charactersInRegion = _members.Filter(m => m.IsIn(region));
+        if (charactersInRegion.Count == 0)
+        {
+            logger($"No members in {region}");
+            return;
+        }
+
+        logger($"Members in {region}:");
+
+        charactersInRegion
+            .ToList()
+            .ForEach(character => logger(character.ToStringWithoutRegion()));
+    }
+}
+
+public class FellowshipOfTheRingService(Logger logger)
+{
+    // holds the status of the fellowship
+    // we update it on each successful call to behaviors
+    private Fellowship _fellowship = new();
+
+    public Either<Error, Unit> AddMember(Character character)
+        => _fellowship
+            .AddMember(character)
+            .Do(f => _fellowship = f)
+            .Map(_ => Unit.Default);
+
+    public Either<Error, Unit> RemoveMember(string name)
+        => name.ToName()
+            .Bind(n => _fellowship.Remove(n))
+            .Match(f => _fellowship = f, err => logger(err.Message));
+
+    public Either<Error, Unit> MoveMembersToRegion(List<string> memberNames, string region)
+        => _fellowship.MoveTo(
+                region.ToRegion(),
+                logger,
+                memberNames.Map(m => m.ToName()).Rights().ToArray()
+            )
+            .Match(f => _fellowship = f, err => logger(err.Message));
+
+    public void PrintMembersInRegion(string region) =>
+        _fellowship.PrintMembersInRegion(region.ToRegion(), logger);
+
+    public override string ToString() => _fellowship.ToString();
+}
+```
+
 Here is ending our journey.
 
 > What did you think about it?
