@@ -27,8 +27,8 @@ namespace LordOfTheRings
                 )
                 .Match(f => _fellowship = f, err => logger(err.Message));
 
-        public void PrintMembersInRegion(string region) =>
-            _fellowship.PrintMembersInRegion(region.ToRegion(), logger);
+        public void PrintMembersInRegion(string region) 
+            => _fellowship.PrintMembersInRegion(region.ToRegion(), logger);
 
         public override string ToString() => _fellowship.ToString();
     }
