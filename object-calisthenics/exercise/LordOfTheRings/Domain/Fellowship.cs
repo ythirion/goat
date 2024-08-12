@@ -6,20 +6,22 @@ namespace LordOfTheRings.Domain
 {
     public sealed class Fellowship
     {
-        private Characters _members = [];
+        private readonly Characters _members;
+
+        public Fellowship() => _members = [];
+        private Fellowship(Characters members) => _members = members;
+        private Fellowship(Characters allMembers, Characters updated) => _members = allMembers + updated;
 
         public Either<Error, Fellowship> AddMember(Character character)
             => _members.Find(c => c == character)
                 .Map(_ => Error.New("A character with the same name already exists in the fellowship."))
-                .ToEither(this)
-                .Swap()
-                .Do(_ => _members = _members.Add(character));
+                .ToEither(defaultLeftValue: new Fellowship(_members.Add(character)))
+                .Swap();
 
         public Either<Error, Fellowship> Remove(Name name)
             => _members.Find(character => character.HasName(name))
-                .ToEither(Error.New($"No character with the name '{name}' exists in the fellowship."))
-                .Do(characterToRemove => _members = _members.Filter(c => c != characterToRemove))
-                .Map(_ => this);
+                .ToEither(defaultLeftValue: Error.New($"No character with the name '{name}' exists in the fellowship."))
+                .Map(characterToRemove => new Fellowship(_members.Filter(c => c != characterToRemove)));
 
         public override string ToString()
             => _members.Fold("Fellowship of the Ring Members:\n",
@@ -28,14 +30,13 @@ namespace LordOfTheRings.Domain
 
         public Either<Error, Fellowship> MoveTo(Region destination, Logger logger, params Name[] names)
         {
-            var errors = _members
-                .Filter(character => ContainsCharacter(names, character))
-                .Map(character => character.Move(destination, logger))
-                .Lefts();
+            var membersToUpdate = _members.Filter(character => ContainsCharacter(names, character));
+            var results = membersToUpdate.Map(character => character.Move(destination, logger));
+            var errors = results.Lefts();
 
             return errors.Count != 0
                 ? errors[0]
-                : this;
+                : new Fellowship(_members.Filter(c => !membersToUpdate.Contains(c)), results.Rights());
         }
 
         private static bool ContainsCharacter(Name[] names, Character character)
