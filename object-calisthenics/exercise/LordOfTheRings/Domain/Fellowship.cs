@@ -42,20 +42,20 @@ namespace LordOfTheRings.Domain
         private static bool ContainsCharacter(Name[] names, Character character)
             => names.Exists(character.HasName);
 
-        public void PrintMembersInRegion(Region region, Logger logger)
+        public void PrintMembersInRegion(Region region, Logger printer)
         {
             var charactersInRegion = _members.Filter(m => m.IsIn(region));
             if (charactersInRegion.Count == 0)
             {
-                logger($"No members in {region}");
+                printer($"No members in {region}");
                 return;
             }
 
-            logger($"Members in {region}:");
+            printer($"Members in {region}:");
 
             charactersInRegion
                 .ToList()
-                .ForEach(character => logger(character.ToStringWithoutRegion()));
+                .ForEach(character => printer(character.ToStringWithoutRegion()));
         }
     }
 }
