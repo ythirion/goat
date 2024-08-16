@@ -1,7 +1,3 @@
 namespace LordOfTheRings;
 
-public class Weapon
-{
-    public string Name { get; set; }
-    public int Damage { get; set; }
-}
+public record Weapon(Name Name, Damage Damage);

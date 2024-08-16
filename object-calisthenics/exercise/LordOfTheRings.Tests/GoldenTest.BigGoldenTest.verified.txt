@@ -1,0 +1,37 @@
+﻿Fellowship of the Ring Members:
+Frodo (Hobbit) with Sting in Shire
+Sam (Hobbit) with Dagger in Shire
+Merry (Hobbit) with Short Sword in Shire
+Pippin (Hobbit) with Bow in Shire
+Aragorn (Human) with Anduril in Shire
+Boromir (Human) with Sword in Shire
+Legolas (Elf) with Bow in Shire
+Gimli (Dwarf) with Axe in Shire
+Gandalf the 🐐 (Wizard) with Staff in Shire
+
+Frodo moved to Rivendell.
+Sam moved to Rivendell.
+Merry moved to Moria.
+Pippin moved to Moria.
+Aragorn moved to Moria.
+Boromir moved to Moria.
+Legolas moved to Lothlorien.
+Gimli moved to Lothlorien.
+Gandalf the 🐐 moved to Lothlorien.
+Frodo moved to Mordor 💀.
+Sam moved to Mordor 💀.
+Cannot move Frodo from Mordor to Shire. Reason: There is no coming back from Mordor.
+No members in Rivendell
+Members in Moria:
+Merry (Hobbit) with Short Sword
+Pippin (Hobbit) with Bow
+Aragorn (Human) with Anduril
+Boromir (Human) with Sword
+Members in Lothlorien:
+Legolas (Elf) with Bow
+Gimli (Dwarf) with Axe
+Gandalf the 🐐 (Wizard) with Staff
+Members in Mordor:
+Frodo (Hobbit) with Sting
+Sam (Hobbit) with Dagger
+No members in Shire
