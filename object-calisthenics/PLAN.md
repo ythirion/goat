@@ -1,0 +1,25 @@
+## Battle Plan
+- Characterization Tests
+	- Characterize the existing behaviors using `approval testing`
+	- `Never start refactoring without being covered by tests`
+- Surface Refactoring
+	- Small changes proposed by my IDE to improve code readability
+	- Quick and automated refactorings:
+		- Remove redundant code
+		- Introduce constants
+		- Remove redundant `else` keywords
+		- ...
+- Don't Abbreviate
+	- Remove cryptic abbreviations by using code context to scaffold the business terms
+- Wrap Primitives and Strings
+	- Design types (Value Objects) to encapsulate / express business concepts: `Name`, `Weapon`, ...
+	- Designed using `Test-Driven Development` and `Sprout Technique`
+- First Class Collections
+	- Create a `Fellowship` collection and use it in the `Service`
+- No Getters/Setters/Properties
+	- Apply the `Tell, Don't Ask` principle to move the behaviors related to business entities in the entities themselves
+- Embracing Monads
+	- Stop throwing exceptions for managing stuff under control and make our domain more transparent
+	- Use `Either` monad instead of throwing exceptions
+- Immutability
+	- Make the domain code immutable for predictability and easier testing
