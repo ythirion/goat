@@ -12,3 +12,4 @@ This repository contains source code for my [`Goat Review`](https://goatreview.c
 - [Object Calisthenics #2: Bringing Order to Chaos by Pierre](https://goatreview.com/object-calisthenics-9-rules-clean-code-implementation-pierre/)
 - [Object Calisthenics #3: Bringing Order to Chaos by Yoan](https://goatreview.com/object-calisthenics-9-rules-clean-code-implementation-yoan/)
 - [Object Calisthenics #4: Implementations explanations](https://goatreview.com/object-calisthenics-9-rules-clean-code-explanations/)
+- [Object Calisthenics #5: Other points of views](https://goatreview.com/object-calisthenics-5-other-points-of-views/)
