@@ -1,6 +1,6 @@
 namespace LordOfTheRings.Tests
 {
-    public class CharacterizationTest : IDisposable
+    public sealed class CharacterizationTest : IDisposable
     {
         private readonly StringWriter _console = new();
 
@@ -12,7 +12,7 @@ namespace LordOfTheRings.Tests
             App.App.Run();
             return Verify(_console.ToString());
         }
-
+        
         public void Dispose()
         {
             _console.Dispose();

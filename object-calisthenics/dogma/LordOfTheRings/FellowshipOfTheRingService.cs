@@ -4,18 +4,18 @@ namespace LordOfTheRings;
 
 public sealed class FellowshipOfTheRingService
 {
-    private readonly List<Character> _members = [];
+    private readonly FellowshipOfTheRing _fellowship = new();
 
     public void AddMember(Character character)
     {
         ValidateCharacterUniqueness(character);
-        _members.Add(character);
+        _fellowship.Add(character);
     }
 
     public void RemoveMember(CharacterName name)
     {
-        var character = FindCharacterByName(name);
-        _members.Remove(character);
+        var character = _fellowship.FindByName(name);
+        _fellowship.Remove(character);
     }
 
     public void MoveMembersToRegion(List<CharacterName> members, Region region)
@@ -31,19 +31,15 @@ public sealed class FellowshipOfTheRingService
 
     private void ValidateCharacterUniqueness(Character character)
     {
-        if (_members.Any(existingMember => existingMember.Name.ToString() == character.Name.ToString()))
+        if (_fellowship.Members.Any(existingMember => existingMember.Name.ToString() == character.Name.ToString()))
         {
             throw new InvalidOperationException("A character with the same name already exists in the fellowship.");
         }
     }
 
-    private Character FindCharacterByName(CharacterName name)
-        => _members.FirstOrDefault(member => member.Name.ToString() == name.ToString())
-           ?? throw new InvalidOperationException($"No character with the name '{name}' exists.");
-
     private void MoveCharacterToRegion(CharacterName name, Region region)
     {
-        var character = FindCharacterByName(name);
+        var character = _fellowship.FindByName(name);
 
         if (character.Region.IsMordor() && !region.IsMordor())
         {
@@ -58,8 +54,8 @@ public sealed class FellowshipOfTheRingService
             region
         );
 
-        _members.Remove(character);
-        _members.Add(updatedCharacter);
+        _fellowship.Remove(character);
+        _fellowship.Add(updatedCharacter);
 
         Console.WriteLine(!region.IsMordor()
             ? $"{character.Name} moved to {region}."
@@ -67,7 +63,7 @@ public sealed class FellowshipOfTheRingService
     }
 
     private Character[] FindMembersInRegion(Region region)
-        => _members.Where(member => member.Region.ToString() == region.ToString()).ToArray();
+        => _fellowship.Members.Where(member => member.Region.ToString() == region.ToString()).ToArray();
 
     private static void PrintMembers(Character[] members, Region region)
     {
@@ -85,7 +81,7 @@ public sealed class FellowshipOfTheRingService
     }
 
     private string FormatFellowshipToString()
-        => _members.Aggregate(
+        => _fellowship.Members.Aggregate(
             "Fellowship of the Ring Members:\n",
             (result, member) =>
                 result + $"{member.Name} ({member.Race}) with {member.Weapon.Name} in {member.Region}\n"
