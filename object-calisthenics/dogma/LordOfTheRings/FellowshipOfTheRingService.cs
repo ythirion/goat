@@ -31,7 +31,7 @@ public sealed class FellowshipOfTheRingService
 
     private void ValidateCharacterUniqueness(Character character)
     {
-        if (_fellowship.Members.Contains(character))
+        if (_fellowship.Contains(character))
         {
             throw new InvalidOperationException("A character with the same name already exists in the fellowship.");
         }
@@ -44,27 +44,24 @@ public sealed class FellowshipOfTheRingService
         if (IsTryingToComeBackFromMordor(region, character))
         {
             throw new InvalidOperationException(
-                $"Cannot move {character.Identity.Name} from Mordor to {region}. Reason: There is no coming back from Mordor.");
+                $"Cannot move {name} from Mordor to {region}. Reason: There is no coming back from Mordor.");
         }
 
-        var updatedCharacter = new Character(
-            character.Identity,
-            character.CurrentState with {Region = region}
-        );
+        var updatedCharacter = character.MoveTo(region);
 
         _fellowship.Remove(character);
         _fellowship.Add(updatedCharacter);
 
         Console.WriteLine(!region.IsMordor()
-            ? $"{character.Identity.Name} moved to {region}."
-            : $"{character.Identity.Name} moved to {region} 💀.");
+            ? $"{name} moved to {region}."
+            : $"{name} moved to {region} 💀.");
     }
 
     private static bool IsTryingToComeBackFromMordor(Region region, Character character) =>
         character.InMordor() && !region.IsMordor();
 
     private Character[] FindMembersInRegion(Region region)
-        => _fellowship.Members.Where(member => member.CurrentState.Region.ToString() == region.ToString()).ToArray();
+        => _fellowship.MembersInRegion(region);
 
     private static void PrintMembers(Character[] members, Region region)
     {
@@ -77,16 +74,9 @@ public sealed class FellowshipOfTheRingService
         Console.WriteLine($"Members in {region}:");
         foreach (var member in members)
         {
-            Console.WriteLine(
-                $"{member.Identity.Name} ({member.Identity.Race}) with {member.CurrentState.Weapon.Name}");
+            Console.WriteLine($"{member.ToStringWithoutRegion()}");
         }
     }
 
-    private string FormatFellowshipToString()
-        => _fellowship.Members.Aggregate(
-            "Fellowship of the Ring Members:\n",
-            (result, member) =>
-                result +
-                $"{member.Identity.Name} ({member.Identity.Race}) with {member.CurrentState.Weapon.Name} in {member.CurrentState.Region}\n"
-        );
+    private string FormatFellowshipToString() => _fellowship.ToString();
 }

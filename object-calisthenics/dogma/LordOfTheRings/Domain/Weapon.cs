@@ -1,7 +1,15 @@
 namespace LordOfTheRings.Domain;
 
-public sealed class Weapon(WeaponName name, Damage damage)
+public sealed class Weapon
 {
-    public WeaponName Name { get; } = name;
-    public Damage Damage { get; } = damage;
+    private readonly WeaponName _name;
+    private readonly Damage _damage;
+
+    public Weapon(WeaponName name, Damage damage)
+    {
+        _name = name;
+        _damage = damage;
+    }
+
+    public override string ToString() => _name.ToString();
 }

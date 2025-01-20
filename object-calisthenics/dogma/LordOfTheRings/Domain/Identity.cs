@@ -1,6 +1,17 @@
 namespace LordOfTheRings.Domain;
 
-public record Identity(CharacterName Name, Race Race)
+public sealed class Identity
 {
-    public bool Is(CharacterName name) => Name.Equals(name);
+    private readonly CharacterName _name;
+    private readonly Race _race;
+
+    public Identity(CharacterName name, Race race)
+    {
+        _name = name;
+        _race = race;
+    }
+
+    public bool Is(CharacterName name) => _name.Equals(name);
+
+    public override string ToString() => $"{_name} ({_race})";
 }
