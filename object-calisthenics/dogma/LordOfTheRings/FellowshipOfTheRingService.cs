@@ -49,8 +49,7 @@ public sealed class FellowshipOfTheRingService
 
         var updatedCharacter = new Character(
             character.Identity,
-            character.Weapon,
-            region
+            character.CurrentState with {Region = region}
         );
 
         _fellowship.Remove(character);
@@ -61,10 +60,11 @@ public sealed class FellowshipOfTheRingService
             : $"{character.Identity.Name} moved to {region} 💀.");
     }
 
-    private static bool IsTryingToComeBackFromMordor(Region region, Character character) => character.InMordor() && !region.IsMordor();
+    private static bool IsTryingToComeBackFromMordor(Region region, Character character) =>
+        character.InMordor() && !region.IsMordor();
 
     private Character[] FindMembersInRegion(Region region)
-        => _fellowship.Members.Where(member => member.Region.ToString() == region.ToString()).ToArray();
+        => _fellowship.Members.Where(member => member.CurrentState.Region.ToString() == region.ToString()).ToArray();
 
     private static void PrintMembers(Character[] members, Region region)
     {
@@ -77,7 +77,8 @@ public sealed class FellowshipOfTheRingService
         Console.WriteLine($"Members in {region}:");
         foreach (var member in members)
         {
-            Console.WriteLine($"{member.Identity.Name} ({member.Identity.Race}) with {member.Weapon.Name}");
+            Console.WriteLine(
+                $"{member.Identity.Name} ({member.Identity.Race}) with {member.CurrentState.Weapon.Name}");
         }
     }
 
@@ -85,6 +86,7 @@ public sealed class FellowshipOfTheRingService
         => _fellowship.Members.Aggregate(
             "Fellowship of the Ring Members:\n",
             (result, member) =>
-                result + $"{member.Identity.Name} ({member.Identity.Race}) with {member.Weapon.Name} in {member.Region}\n"
+                result +
+                $"{member.Identity.Name} ({member.Identity.Race}) with {member.CurrentState.Weapon.Name} in {member.CurrentState.Region}\n"
         );
 }

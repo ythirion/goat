@@ -62,8 +62,8 @@ public static class App
         int damage, string region)
         => fellowship.AddMember(new Character(
             new Identity(new CharacterName(name), new Race(race)),
-            new Weapon(new WeaponName(weapon), new Damage(damage)),
-            new Region(region)
+            new State(new Weapon(new WeaponName(weapon), new Damage(damage)),
+                new Region(region))
         ));
 
     private static void MoveGroupToRegion(FellowshipOfTheRingService fellowship, List<string> names, string region)

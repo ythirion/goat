@@ -4,21 +4,20 @@ namespace LordOfTheRings;
 
 public sealed class FellowshipOfTheRing
 {
-    private readonly List<Character> _members = [];
-    public List<Character> Members => _members;
+    public List<Character> Members { get; } = [];
 
     public void Add(Character character)
     {
-        if (_members.Contains(character))
+        if (Members.Contains(character))
         {
             throw new InvalidOperationException("A character with the same name already exists in the fellowship.");
         }
-        _members.Add(character);
+        Members.Add(character);
     }
 
-    public void Remove(Character character) => _members.Remove(character);
+    public void Remove(Character character) => Members.Remove(character);
 
     public Character FindByName(CharacterName name)
-        => _members.FirstOrDefault(member => member.Identity.Is(name))
+        => Members.FirstOrDefault(member => member.Identity.Is(name))
            ?? throw new InvalidOperationException($"No character with the name '{name}' exists.");
 }
