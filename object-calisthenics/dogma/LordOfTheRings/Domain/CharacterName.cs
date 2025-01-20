@@ -1,6 +1,6 @@
 namespace LordOfTheRings.Domain;
 
-public sealed class CharacterName
+public sealed class CharacterName : IEquatable<CharacterName>
 {
     private readonly string _value;
 
@@ -15,4 +15,14 @@ public sealed class CharacterName
     }
 
     public override string ToString() => _value;
+
+    public bool Equals(CharacterName? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return _value == other._value;
+    }
+
+    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is CharacterName other && Equals(other);
+    public override int GetHashCode() => _value.GetHashCode();
 }

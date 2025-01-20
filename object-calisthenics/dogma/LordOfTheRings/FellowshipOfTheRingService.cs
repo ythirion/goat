@@ -31,7 +31,7 @@ public sealed class FellowshipOfTheRingService
 
     private void ValidateCharacterUniqueness(Character character)
     {
-        if (_fellowship.Members.Any(existingMember => existingMember.Name.ToString() == character.Name.ToString()))
+        if (_fellowship.Members.Contains(character))
         {
             throw new InvalidOperationException("A character with the same name already exists in the fellowship.");
         }
@@ -41,7 +41,7 @@ public sealed class FellowshipOfTheRingService
     {
         var character = _fellowship.FindByName(name);
 
-        if (character.Region.IsMordor() && !region.IsMordor())
+        if (IsTryingToComeBackFromMordor(region, character))
         {
             throw new InvalidOperationException(
                 $"Cannot move {character.Name} from Mordor to {region}. Reason: There is no coming back from Mordor.");
@@ -61,6 +61,8 @@ public sealed class FellowshipOfTheRingService
             ? $"{character.Name} moved to {region}."
             : $"{character.Name} moved to {region} 💀.");
     }
+
+    private static bool IsTryingToComeBackFromMordor(Region region, Character character) => character.InMordor() && !region.IsMordor();
 
     private Character[] FindMembersInRegion(Region region)
         => _fellowship.Members.Where(member => member.Region.ToString() == region.ToString()).ToArray();

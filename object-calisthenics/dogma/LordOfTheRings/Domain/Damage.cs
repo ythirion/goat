@@ -1,6 +1,6 @@
 namespace LordOfTheRings.Domain;
 
-public sealed class Damage
+public sealed record Damage
 {
     private readonly int _value;
 
