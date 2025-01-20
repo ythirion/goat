@@ -19,6 +19,6 @@ public sealed class FellowshipOfTheRing
     public void Remove(Character character) => _members.Remove(character);
 
     public Character FindByName(CharacterName name)
-        => _members.FirstOrDefault(member => member.Name == name)
+        => _members.FirstOrDefault(member => member.Identity.Is(name))
            ?? throw new InvalidOperationException($"No character with the name '{name}' exists.");
 }

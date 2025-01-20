@@ -44,12 +44,11 @@ public sealed class FellowshipOfTheRingService
         if (IsTryingToComeBackFromMordor(region, character))
         {
             throw new InvalidOperationException(
-                $"Cannot move {character.Name} from Mordor to {region}. Reason: There is no coming back from Mordor.");
+                $"Cannot move {character.Identity.Name} from Mordor to {region}. Reason: There is no coming back from Mordor.");
         }
 
         var updatedCharacter = new Character(
-            character.Name,
-            character.Race,
+            character.Identity,
             character.Weapon,
             region
         );
@@ -58,8 +57,8 @@ public sealed class FellowshipOfTheRingService
         _fellowship.Add(updatedCharacter);
 
         Console.WriteLine(!region.IsMordor()
-            ? $"{character.Name} moved to {region}."
-            : $"{character.Name} moved to {region} 💀.");
+            ? $"{character.Identity.Name} moved to {region}."
+            : $"{character.Identity.Name} moved to {region} 💀.");
     }
 
     private static bool IsTryingToComeBackFromMordor(Region region, Character character) => character.InMordor() && !region.IsMordor();
@@ -78,7 +77,7 @@ public sealed class FellowshipOfTheRingService
         Console.WriteLine($"Members in {region}:");
         foreach (var member in members)
         {
-            Console.WriteLine($"{member.Name} ({member.Race}) with {member.Weapon.Name}");
+            Console.WriteLine($"{member.Identity.Name} ({member.Identity.Race}) with {member.Weapon.Name}");
         }
     }
 
@@ -86,6 +85,6 @@ public sealed class FellowshipOfTheRingService
         => _fellowship.Members.Aggregate(
             "Fellowship of the Ring Members:\n",
             (result, member) =>
-                result + $"{member.Name} ({member.Race}) with {member.Weapon.Name} in {member.Region}\n"
+                result + $"{member.Identity.Name} ({member.Identity.Race}) with {member.Weapon.Name} in {member.Region}\n"
         );
 }

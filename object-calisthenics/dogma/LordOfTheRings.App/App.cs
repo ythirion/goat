@@ -61,8 +61,7 @@ public static class App
     private static void AddCharacter(FellowshipOfTheRingService fellowship, string name, string race, string weapon,
         int damage, string region)
         => fellowship.AddMember(new Character(
-            new CharacterName(name),
-            new Race(race),
+            new Identity(new CharacterName(name), new Race(race)),
             new Weapon(new WeaponName(weapon), new Damage(damage)),
             new Region(region)
         ));
