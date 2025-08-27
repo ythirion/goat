@@ -13,3 +13,7 @@ This repository contains source code for my [`Goat Review`](https://goatreview.c
 - [Object Calisthenics #3: Bringing Order to Chaos by Yoan](https://goatreview.com/object-calisthenics-9-rules-clean-code-implementation-yoan/)
 - [Object Calisthenics #4: Implementations explanations](https://goatreview.com/object-calisthenics-9-rules-clean-code-explanations/)
 - [Object Calisthenics #5: Other points of views](https://goatreview.com/object-calisthenics-5-other-points-of-views/)
+
+### Outside-In Code Discovery
+- [An Outside-In Approach to Discover Unknown Codebases](https://goatreview.com/outside-approach-discover-unknown-codebases/)
+- [Augmented Outside-In Discovery with Claude Code](https://goatreview.com/augmented-outside-discovery-claude-code/)
