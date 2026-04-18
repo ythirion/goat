@@ -16,4 +16,4 @@ This repository contains source code for my [`Goat Review`](https://goatreview.c
 
 ### Outside-In Code Discovery
 - [An Outside-In Approach to Discover Unknown Codebases](https://goatreview.com/outside-approach-discover-unknown-codebases/)
-- [Augmented Outside-In Discovery with Claude Code](https://goatreview.com/augmented-outside-discovery-claude-code/)
+- [Augmented Outside-In Discovery with Claude Code](https://goatreview.com/augmented-outside-in-discovery-with-claude-code/)
